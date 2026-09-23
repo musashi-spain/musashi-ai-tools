@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Visor de Logs · Correlación entre estaciones · Musashi AI</title>
+<style>
+/* =====================================================================
+   MUSASHI AI · BRAND SYSTEM
+   Primary:  Light Blue #008cc5 · Black #000000
+   Secondary: Space Cadet #2e324f · Glaucous #8391c0 · Gray #b3b3b3
+   Tertiary:  Sapphire #054cd9 · Bright Sky Blue #20beff
+   Type:      Univers (headers) / Poppins (body)
+   ===================================================================== */
+:root{
+  --mai-blue:#008cc5;
+  --mai-blue-dk:#00709e;
+  --mai-black:#000000;
+  --space-cadet:#2e324f;
+  --glaucous:#8391c0;
+  --gray:#b3b3b3;
+  --sapphire:#054cd9;
+  --sky:#20beff;
+
+  --bg:#f4f6fa;
+  --panel:#ffffff;
+  --panel-2:#f3f6fb;
+  --line:#dde3ee;
+  --line-2:#eaeef6;
+  --txt:#1a1d2e;
+  --muted:#5c6480;
+  --muted-2:#8b93ab;
+
+  --accent:var(--mai-blue);
+  --accent-soft:#e3f3fa;
+  --accent-2:var(--sapphire);
+  --accent-2-soft:#e8effc;
+  --good:#0f9d63;
+  --good-soft:#e6f7ef;
+  --warn:#b45309;
+  --warn-soft:#fef4e6;
+  --bad:#c0392b;
+  --bad-soft:#fdeceb;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(46,50,79,.09);
+  --grad-blue:linear-gradient(135deg,#054cd9,#20beff);
+  --grad-cadet:linear-gradient(160deg,#2e324f,#8391c0);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--txt);
+  background:
+    radial-gradient(1100px 520px at 12% -12%, rgba(32,190,255,.13) 0%, transparent 58%),
+    radial-gradient(900px 480px at 100% -6%, rgba(131,145,192,.16) 0%, transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+
+header{padding:22px 26px 6px;max-width:1800px;margin:0 auto}
+.title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{
+  width:44px;height:44px;border-radius:12px;flex:none;position:relative;
+  background:var(--grad-blue);
+  box-shadow:0 8px 22px rgba(5,76,217,.30);
+  overflow:hidden;
+}
+.logo::after{
+  content:"A";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:"Univers","Poppins",system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;
+}
+h1{
+  font-size:19px;margin:0;letter-spacing:.2px;font-weight:700;
+  font-family:"Univers","Poppins",system-ui,sans-serif;
+}
+.eyebrow{
+  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--mai-blue);margin-bottom:3px;
+}
+header p{margin:3px 0 0;color:var(--muted);font-size:12.5px;max-width:900px}
+.head-actions{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.layout{max-width:1800px;margin:0 auto;padding:16px 26px 44px;display:grid;grid-template-columns:400px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1180px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+/* Panel de controles fijo al hacer scroll (solo en escritorio) */
+.controls-col{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;padding-right:2px}
+.controls-col::-webkit-scrollbar{width:8px}
+.controls-col::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+.controls-col::-webkit-scrollbar-track{background:transparent}
+@media (max-width:1180px){.controls-col{position:static;max-height:none;overflow:visible}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel + .panel{margin-top:18px}
+.panel-head{padding:13px 18px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
+.panel-head::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--radius) 0 0 0;
+  background:var(--grad-blue);
+}
+.panel-head h2{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1.15px;color:var(--space-cadet);font-weight:700}
+.panel-body{padding:16px 18px 18px}
+.badge{font-size:11px;font-weight:700;letter-spacing:.4px;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:#00709e}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.good{background:var(--good-soft);color:var(--good)}
+.badge.mute{background:var(--panel-2);color:var(--muted-2)}
+
+.field{margin-bottom:15px}
+.field:last-child{margin-bottom:0}
+.field-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px}
+.field-head label{font-size:13px;font-weight:650;color:#22334a}
+.field-head .unit{font-size:10.5px;color:var(--muted-2);letter-spacing:.6px;font-weight:700}
+
+input[type="text"],input[type="number"],select{
+  background:var(--panel-2);color:var(--txt);border:1px solid var(--line);border-radius:9px;
+  padding:8px 9px;font-size:13px;font-family:inherit;outline:none;width:100%;
+  transition:border-color .15s, box-shadow .15s, background .15s;
+}
+input[type="text"]:focus,input[type="number"]:focus,select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(0,140,197,.14)}
+.hint{font-size:11px;color:var(--muted-2);margin-top:6px;line-height:1.5}
+.hint b{color:var(--muted)}
+.hint.warn-text{color:var(--warn)}
+.input-action{display:flex;gap:8px;align-items:stretch}
+.input-action input{flex:1;min-width:0}
+.input-action .btn{flex:none;white-space:nowrap}
+.hidden{display:none!important}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:transparent;border:0;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 11px;cursor:pointer;transition:.15s}
+.seg button.active{background:var(--accent-soft);color:#00709e}
+.seg button:hover{color:#22334a}
+
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#41556c;cursor:pointer;user-select:none}
+.chk input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+
+/* ---------- Zona de carga ---------- */
+.drop{
+  border:1.5px dashed #bcd3e6;border-radius:12px;background:linear-gradient(180deg,#f7fbff,#eef6fc);
+  padding:20px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.drop:hover,.drop.over{border-color:var(--accent);background:#eaf6fd;box-shadow:0 0 0 3px rgba(0,140,197,.10)}
+.drop .big{font-size:13.5px;font-weight:700;color:#22334a}
+.drop .small{font-size:11.5px;color:var(--muted-2);margin-top:4px;line-height:1.5}
+.drop .ico{font-size:22px;line-height:1;color:var(--accent);display:block;margin-bottom:6px}
+
+.progress-wrap{margin-top:12px}
+.progress{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress > i{display:block;height:100%;width:0;background:var(--grad-blue);transition:width .1s linear}
+.progress-label{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted-2);margin-top:5px}
+
+/* ---------- Lista de fuentes ---------- */
+.src-list{margin-top:14px;border-top:1px solid var(--line)}
+.src{
+  display:grid;grid-template-columns:14px 16px minmax(0,1fr) auto auto;gap:9px;align-items:center;
+  padding:10px 2px;border-bottom:1px solid var(--line-2);
+}
+.src .swatch{width:11px;height:11px;border-radius:3px;flex:none}
+.src .name{font-size:12.3px;font-weight:600;color:#22334a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.src .name:hover{color:var(--accent);text-decoration:underline dotted}
+.src .rename-input{width:100%;padding:3px 6px;font-size:12.3px;font-weight:600;border:1px solid var(--accent);border-radius:6px;background:#fff;outline:none;font-family:inherit;box-shadow:0 0 0 3px rgba(0,140,197,.14)}
+.src .meta{font-size:10.5px;color:var(--muted-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.src .x{background:transparent;border:0;color:var(--muted-2);cursor:pointer;font-size:15px;line-height:1;padding:2px 4px;border-radius:6px}
+.src .x:hover{color:var(--bad);background:var(--bad-soft)}
+.src.dim .name,.src.dim .meta{opacity:.45}
+.empty{font-size:12px;color:var(--muted-2);padding:10px 2px;line-height:1.55}
+
+/* ---------- Chips de nivel ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-size:10.5px;font-weight:700;letter-spacing:.3px;cursor:pointer;user-select:none;
+  border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
+  padding:4px 9px;border-radius:99px;transition:.15s;
+}
+.chip:hover{border-color:#c3d4e4}
+.chip.on{background:var(--accent-soft);border-color:#bfe0ef;color:#00709e}
+.chip.off{opacity:.45;text-decoration:line-through}
+
+/* ---------- Tablas / métricas ---------- */
+.metrics{border-top:1px solid var(--line);margin-top:2px}
+.metric{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.metric:last-child{border-bottom:0}
+.metric-label{font-size:12.5px;color:var(--muted);font-weight:500}
+.metric-value{font-size:15px;font-weight:700;color:#101d2d;font-variant-numeric:tabular-nums;white-space:nowrap}
+.metric-value small{font-size:11px;color:var(--muted-2);font-weight:600;margin-left:3px}
+.metric.emphasis .metric-value{color:var(--mai-blue)}
+.metric.emphasis-2 .metric-value{color:var(--sapphire)}
+
+.spec-block{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}
+.spec-title{font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted-2);margin:12px 0 2px}
+.spec-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px dashed var(--line-2);min-width:0}
+.spec-row span{font-size:11.5px;color:var(--muted-2)}
+.spec-row b{font-size:12px;font-weight:650;color:#22334a;font-variant-numeric:tabular-nums;text-align:right}
+
+/* ---------- Medición / correlación ---------- */
+.measure-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.measure-card{background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;min-width:0}
+.measure-card .k{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted-2)}
+.measure-card .v{font-size:13px;font-weight:700;color:#101d2d;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.measure-card.a{border-left:3px solid var(--accent)}
+.measure-card.b{border-left:3px solid var(--accent-2)}
+.delta-big{
+  margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);
+  border:1px solid #c9e4f1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+}
+.delta-big .k{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#0a5a78}
+.delta-big .v{font-size:22px;font-weight:800;color:#054cd9;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+
+.corr{border-top:1px solid var(--line);margin-top:12px}
+.corr-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 92px 78px;gap:10px;align-items:baseline;
+  padding:9px 2px;border-bottom:1px solid var(--line-2);
+}
+.corr-row .s{font-size:11.8px;font-weight:650;color:#22334a;display:flex;align-items:center;gap:7px;min-width:0}
+.corr-row .s i{width:9px;height:9px;border-radius:2px;flex:none}
+.corr-row .s span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.corr-row .d{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.corr-row .d.before{color:var(--warn)}
+.corr-row .d.after{color:var(--mai-blue)}
+.corr-row .d.same{color:var(--good)}
+.corr-row .dir{font-size:10.5px;color:var(--muted-2);text-align:right;white-space:nowrap}
+.corr-msg{font-size:11.5px;color:var(--muted);padding:0 2px 9px 18px;line-height:1.45;border-bottom:1px solid var(--line-2);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- Detalle ---------- */
+.detail-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.detail-head .tag{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--accent-soft);color:#00709e}
+.detail-msg{
+  font-family:var(--mono);font-size:12px;line-height:1.6;color:#22334a;
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;
+  padding:11px 13px;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;
+}
+
+/* ---------- Botones ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
+  font-family:inherit;font-size:12px;font-weight:650;color:#22334a;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;
+  transition:border-color .15s,background .15s,box-shadow .15s,color .15s;
+}
+.btn:hover{border-color:var(--accent);background:#fff}
+.btn:active{transform:translateY(1px)}
+.btn.primary{color:#fff;background:var(--grad-blue);border:0;box-shadow:0 6px 16px rgba(5,76,217,.22)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.btn.sm{padding:6px 9px;font-size:11.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* ---------- Línea de tiempo ---------- */
+.tl-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.tl-toolbar .grow{flex:1}
+.goto{display:inline-flex;align-items:center;gap:6px}
+.goto select{width:auto;max-width:180px;padding:6px 8px;font-size:12px}
+.goto input{width:88px;padding:6px 8px;font-size:12px;font-variant-numeric:tabular-nums}
+.goto-msg{font-size:11px;color:var(--muted-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.goto-msg.bad{color:var(--warn)}
+.tl-head{
+  display:grid;grid-template-columns:104px 88px 132px 56px minmax(0,1fr) 60px;gap:0;
+  padding:7px 16px;background:var(--panel-2);border-bottom:1px solid var(--line);
+  font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted-2);
+}
+.tl-scroll{position:relative;overflow:auto;overscroll-behavior:contain;height:clamp(380px,calc(100vh - 330px),780px);background:#fff}
+.tl-scroll::-webkit-scrollbar{width:11px;height:11px}
+.tl-scroll::-webkit-scrollbar-thumb{background:#cdd8e6;border-radius:99px;border:3px solid #fff}
+.tl-spacer{position:relative;width:100%}
+.tl-rows{position:absolute;left:0;right:0;top:0;will-change:transform}
+.tl-row{
+  display:grid;grid-template-columns:104px 88px 132px 56px minmax(0,1fr) 60px;gap:0;
+  height:22px;line-height:22px;font-size:12px;padding:0 16px;
+  border-bottom:1px solid #f1f4f9;cursor:pointer;white-space:nowrap;
+}
+.tl-row:hover{background:#f2f8fd}
+.tl-row.sel{background:#e3f3fa;box-shadow:inset 3px 0 0 var(--accent)}
+.tl-row.sel2{background:#e8effc;box-shadow:inset 3px 0 0 var(--accent-2)}
+.tl-row.gap{box-shadow:inset 0 2px 0 #f0b46a}
+.tl-row.sel.gap{box-shadow:inset 3px 0 0 var(--accent),inset 0 2px 0 #f0b46a}
+.tl-row > span{overflow:hidden;text-overflow:ellipsis}
+.tl-row .c-time,.tl-row .c-dt,.tl-row .c-line{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tl-row .c-time{color:#41556c}
+.tl-row .c-dt{color:var(--muted-2);font-size:11px;padding-left:6px}
+.tl-row .c-src{display:flex;align-items:center;gap:6px;color:#22334a;font-weight:600;font-size:11.5px}
+.tl-row .c-src i{width:8px;height:8px;border-radius:2px;flex:none}
+.tl-row .c-lvl{font-weight:700;font-size:10.5px;letter-spacing:.2px;padding-left:4px}
+.tl-row .c-msg{color:#2c3a4d;padding-left:4px}
+.tl-row .c-line{color:var(--muted-2);font-size:10.5px;text-align:right}
+.tl-row mark{background:#fff2a8;color:inherit;border-radius:2px;padding:0 1px}
+.tl-row .c-msg .gapdot{color:var(--warn);font-weight:700}
+
+.lv-other{color:#8b93ab}
+.lv-1{color:#0e7490}
+.lv-2{color:#0369a1}
+.lv-3{color:#1d4ed8}
+.lv-4{color:#6d28d9}
+.lv-5{color:#7c3aed}
+.lv-info{color:#0f766e}
+.lv-warn{color:#b45309}
+.lv-error{color:#c0392b}
+.lv-debug{color:#64748b}
+.lv-trace{color:#94a3b8}
+.lv-crit{color:#991b1b}
+
+/* ---------- Gráfico de actividad ---------- */
+.chart-wrap{padding:12px 16px 6px}
+#activity{display:block;width:100%;height:128px;cursor:crosshair}
+.chart-legend{display:flex;flex-wrap:wrap;gap:14px;padding:6px 16px 14px;font-size:11px;color:var(--muted)}
+.chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.chart-legend .mute{color:var(--muted-2)}
+
+/* ---------- Ayuda ---------- */
+.btn-help{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  background:var(--panel);border:1px solid var(--line);border-radius:99px;
+  padding:7px 14px;font-family:inherit;font-size:12.5px;font-weight:650;color:#22334a;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.btn-help:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,140,197,.12)}
+.btn-help.active{background:var(--accent-soft);border-color:var(--accent);color:#00709e}
+.btn-help .q{width:17px;height:17px;border-radius:50%;background:var(--accent);color:#fff;font-size:11.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.btn-help .chev{font-size:10px;color:var(--muted-2);transition:transform .18s}
+.btn-help.active .chev{transform:rotate(180deg)}
+
+#helpRow{margin-top:14px}
+.help-panel{padding:6px 18px 20px}
+.help-list{display:flex;flex-direction:column;gap:0}
+.help-row{display:grid;grid-template-columns:210px minmax(0,1fr) 300px;gap:26px;padding:18px 0;border-bottom:1px solid var(--line-2);align-items:start}
+.help-row:last-child{border-bottom:0}
+@media (max-width:1180px){.help-row{grid-template-columns:minmax(0,1fr);gap:12px}.help-row .help-fig{max-width:420px}}
+.help-term h4{margin:0;font-size:13.5px;font-weight:700;color:#101d2d}
+.help-term em{display:inline-block;margin-top:6px;font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#00709e;background:var(--accent-soft);padding:3px 8px;border-radius:6px}
+.help-desc{font-size:12.7px;line-height:1.6;color:#41556c}
+.help-desc p{margin:0 0 8px}
+.help-desc p:last-child{margin-bottom:0}
+.help-desc ul{margin:8px 0 0;padding-left:17px}
+.help-desc li{margin-bottom:3px}
+.help-desc b{color:#22334a;font-weight:650}
+.help-fx{display:block;margin-top:9px;padding:6px 0 6px 11px;border-left:2px solid #aed6ea;font-family:var(--mono);font-size:11.5px;color:#2c4358;line-height:1.75;white-space:pre-wrap}
+.help-fig svg{display:block;width:100%;height:auto;max-height:172px}
+.help-fig figcaption{margin-top:6px;font-size:11px;color:var(--muted-2);line-height:1.45}
+.help-note{margin-top:16px;padding:11px 14px;border-radius:10px;background:var(--accent-soft);border:1px solid #c9e4f1;color:#0a5a78;font-size:12.4px;line-height:1.55}
+.help-note b{font-weight:700}
+kbd{font-family:var(--mono);font-size:11px;background:var(--panel-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:#3b5169}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <div class="eyebrow">Musashi AI · Automated Inspection Solutions</div>
+      <h1>Visor de Logs · Correlación entre estaciones</h1>
+      <p>Carga varios <code>.log</code> a la vez, mézclalos por marca de tiempo y descubre qué hacía cada estación en el mismo instante.</p>
+    </div>
+    <div class="head-actions">
+      <span class="badge mute" id="loadBadge">sin datos</span>
+      <button type="button" class="btn-help" id="helpBtn" aria-expanded="false" aria-controls="helpRow">
+        <span class="q">?</span> Ayuda: cómo funciona <span class="chev">▼</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section id="helpRow" class="panel hidden" style="max-width:1800px;margin:14px auto 0;width:calc(100% - 52px)">
+  <div class="panel-head"><h2>Guía de uso</h2><span class="badge">referencia rápida</span></div>
+  <div class="help-panel">
+    <div class="help-list">
+
+      <!-- 1. Qué hace -->
+      <div class="help-row">
+        <div class="help-term"><h4>Qué hace el visor</h4><em>varias fuentes · una línea de tiempo</em></div>
+        <div class="help-desc">
+          <p>Un log suele contar solo lo que hace <b>una</b> estación. El problema real aparece cuando quieres saber qué estaba pasando en las demás <b>en el mismo instante</b>: si el horno estaba calentando el pan mientras la amasadora lo amasaba, quién avisó primero, cuánto tardó la respuesta…</p>
+          <p>Este visor carga <b>2 o más archivos</b>, extrae de cada línea su marca de tiempo y los <b>intercala en una única secuencia cronológica</b>. Cada fuente tiene su color, de modo que el orden real de los acontecimientos se lee de un vistazo.</p>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Varias fuentes mezcladas en una línea de tiempo">
+            <text x="4" y="22" font-size="9" font-weight="700" fill="#00709e">horno.log</text>
+            <text x="4" y="52" font-size="9" font-weight="700" fill="#0f9d63">amasadora.log</text>
+            <text x="4" y="82" font-size="9" font-weight="700" fill="#b45309">cámara.log</text>
+            <g>
+              <rect x="86" y="12" width="52" height="14" rx="3" fill="#008cc5" opacity=".85"/>
+              <rect x="176" y="12" width="52" height="14" rx="3" fill="#008cc5" opacity=".85"/>
+              <rect x="146" y="42" width="52" height="14" rx="3" fill="#0f9d63" opacity=".85"/>
+              <rect x="236" y="42" width="46" height="14" rx="3" fill="#0f9d63" opacity=".85"/>
+              <rect x="106" y="72" width="52" height="14" rx="3" fill="#b45309" opacity=".85"/>
+              <rect x="206" y="72" width="52" height="14" rx="3" fill="#b45309" opacity=".85"/>
+            </g>
+            <line x1="16" y1="118" x2="290" y2="118" stroke="#cbd8e6" stroke-width="1.4"/>
+            <g fill="#8b93ab">
+              <rect x="86" y="104" width="7" height="14" fill="#008cc5"/>
+              <rect x="106" y="104" width="7" height="14" fill="#b45309"/>
+              <rect x="146" y="104" width="7" height="14" fill="#0f9d63"/>
+              <rect x="176" y="104" width="7" height="14" fill="#008cc5"/>
+              <rect x="206" y="104" width="7" height="14" fill="#b45309"/>
+              <rect x="236" y="104" width="7" height="14" fill="#0f9d63"/>
+            </g>
+            <text x="150" y="142" text-anchor="middle" font-size="9.5" fill="#5b7089">secuencia combinada ordenada por tiempo</text>
+          </svg>
+          <figcaption>Cada fila se ordena por su timestamp, no por el archivo de origen.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 2. Formato -->
+      <div class="help-row">
+        <div class="help-term"><h4>Formato de log aceptado</h4><em>texto plano</em></div>
+        <div class="help-desc">
+          <p>Se reconocen líneas que empiezan por una marca de tiempo seguida de <code> -&gt; </code>:</p>
+          <span class="help-fx">2026-09-23, 05:55:11:144 -&gt; LOG 2: Detected lot with id 754
+2026-09-23, 05:55:44:922 -&gt; WARNING: PRE =std::exposuretime
+2026-09-23, 06:03:46:555 -&gt; ERROR: HARAKIRI: critical failure</span>
+          <p>El <b>nivel</b> se detecta del prefijo (<code>LOG 1</code>…<code>LOG 5</code>, <code>WARNING</code>, <code>ERROR</code>, <code>INFO</code>, <code>DEBUG</code>, <code>TRACE</code>, <code>CRITICAL</code>). Las líneas sin timestamp (continuaciones, stack traces) se <b>anexan al mensaje anterior</b>.</p>
+          <p>Todo ocurre en tu navegador: <b>ningún archivo se sube a ningún sitio</b>.</p>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Anatomía de una línea de log">
+            <rect x="10" y="30" width="66" height="20" rx="4" fill="#e3f3fa" stroke="#008cc5"/>
+            <text x="43" y="44" text-anchor="middle" font-size="9" font-weight="700" fill="#00709e">timestamp</text>
+            <text x="82" y="44" font-size="11" font-weight="700" fill="#94a3b8">-&gt;</text>
+            <rect x="102" y="30" width="46" height="20" rx="4" fill="#fef4e6" stroke="#b45309"/>
+            <text x="125" y="44" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">nivel</text>
+            <rect x="154" y="30" width="136" height="20" rx="4" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="222" y="44" text-anchor="middle" font-size="9" font-weight="700" fill="#5b7089">mensaje</text>
+            <line x1="10" y1="66" x2="290" y2="66" stroke="#eaeef6"/>
+            <text x="10" y="88" font-size="9.5" fill="#5b7089">Fecha, hora y milisegundos se usan como clave de orden.</text>
+            <text x="10" y="106" font-size="9.5" fill="#5b7089">El nivel permite filtrar y colorear la lista.</text>
+            <text x="10" y="124" font-size="9.5" fill="#5b7089">El mensaje se indexa para búsquedas de texto o regex.</text>
+          </svg>
+          <figcaption>Anatomía de una línea; el resto del mensaje es texto libre.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 3. Medición de tiempos -->
+      <div class="help-row">
+        <div class="help-term"><h4>Medir tiempos entre mensajes</h4><em>Δ · ancla · shift</em></div>
+        <div class="help-desc">
+          <p>Haz <b>clic</b> en un mensaje para fijarlo como <b>ancla</b>. A partir de ahí:</p>
+          <ul>
+            <li>La columna <b>Δ</b> muestra, en cada fila, el tiempo respecto al mensaje <b>anterior</b> (o respecto al ancla, con el conmutador).</li>
+            <li><kbd>Shift</kbd> + clic en otro mensaje fija un <b>segundo punto</b> y aparece el Δt exacto entre ambos.</li>
+            <li>Los <b>huecos</b> mayores que el umbral se marcan con una línea ámbar superior.</li>
+          </ul>
+          <span class="help-fx">Δt = t(B) − t(A)   ·   se muestra en ms, s o min:seg</span>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Diferencia de tiempo entre dos mensajes">
+            <line x1="20" y1="80" x2="290" y2="80" stroke="#cbd8e6" stroke-width="1.4"/>
+            <circle cx="70" cy="80" r="6" fill="#008cc5"/>
+            <text x="70" y="64" text-anchor="middle" font-size="10" font-weight="700" fill="#00709e">A (ancla)</text>
+            <circle cx="220" cy="80" r="6" fill="#054cd9"/>
+            <text x="220" y="64" text-anchor="middle" font-size="10" font-weight="700" fill="#054cd9">B (shift)</text>
+            <line x1="70" y1="98" x2="220" y2="98" stroke="#054cd9" stroke-width="1.6"/>
+            <line x1="70" y1="93" x2="70" y2="103" stroke="#054cd9" stroke-width="1.6"/>
+            <line x1="220" y1="93" x2="220" y2="103" stroke="#054cd9" stroke-width="1.6"/>
+            <text x="145" y="120" text-anchor="middle" font-size="11" font-weight="700" fill="#054cd9">Δt</text>
+            <text x="150" y="140" text-anchor="middle" font-size="9.5" fill="#5b7089">dos clics = una medida exacta</text>
+          </svg>
+          <figcaption>Ancla + segundo punto para medir cualquier intervalo.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 4. Correlación -->
+      <div class="help-row">
+        <div class="help-term"><h4>Correlación entre estaciones</h4><em>evento más cercano</em></div>
+        <div class="help-desc">
+          <p>Al fijar un ancla, el panel de correlación busca en <b>cada otra fuente</b> el mensaje <b>más próximo en el tiempo</b> y calcula su distancia. Es la forma rápida de responder “¿qué estaba haciendo la amasadora cuando el horno dijo esto?”.</p>
+          <p>El signo indica el sentido: <b>antes</b> (ámbar) o <b>después</b> (azul). Cada fila se puede pulsar para saltar a ese mensaje y encadenar la investigación.</p>
+          <span class="help-fx">para cada fuente: argmin | t(evento) − t(ancla) |</span>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Evento más cercano por estación">
+            <line x1="150" y1="16" x2="150" y2="134" stroke="#054cd9" stroke-width="2"/>
+            <text x="150" y="12" text-anchor="middle" font-size="9.5" font-weight="700" fill="#054cd9">ancla</text>
+            <line x1="20" y1="50" x2="290" y2="50" stroke="#eaeef6"/>
+            <line x1="20" y1="90" x2="290" y2="90" stroke="#eaeef6"/>
+            <line x1="20" y1="130" x2="290" y2="130" stroke="#eaeef6"/>
+            <circle cx="108" cy="50" r="5" fill="#b45309"/><text x="80" y="42" font-size="9" fill="#b45309">−Δ antes</text>
+            <circle cx="204" cy="90" r="5" fill="#008cc5"/><text x="212" y="82" font-size="9" fill="#008cc5">+Δ después</text>
+            <circle cx="150" cy="130" r="5" fill="#0f9d63"/><text x="160" y="122" font-size="9" fill="#0f9d63">mismo instante</text>
+          </svg>
+          <figcaption>El vecino temporal más cercano en cada estación.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 5. Filtros y búsqueda -->
+      <div class="help-row">
+        <div class="help-term"><h4>Filtros y búsqueda</h4><em>texto · regex · niveles</em></div>
+        <div class="help-desc">
+          <ul>
+            <li><b>Filtrar</b> reduce la línea de tiempo a las líneas que contienen un texto (o que cumplen una <b>regex</b>). Con millones de líneas el barrido es costoso, así que <b>no se aplica al teclear</b>: escribe y pulsa <b>Aplicar filtro</b> (o <kbd>Enter</kbd>).</li>
+            <li><b>Buscar</b> no oculta nada: resalta las coincidencias y permite saltar con <kbd>Enter</kbd> / <kbd>Shift</kbd>+<kbd>Enter</kbd>. También se lanza bajo demanda con el botón <b>Buscar</b>.</li>
+            <li><b>Niveles</b> y <b>fuentes</b> se activan o desactivan con un clic (esto sí se aplica al instante).</li>
+            <li><b>Colapsar duplicados consecutivos</b> oculta repeticiones idénticas seguidas de la misma fuente.</li>
+          </ul>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Filtros">
+            <rect x="20" y="24" width="260" height="26" rx="7" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="34" y="41" font-size="11" fill="#8b93ab">buscar…</text>
+            <rect x="20" y="64" width="80" height="22" rx="11" fill="#e3f3fa" stroke="#bfe0ef"/>
+            <text x="60" y="79" text-anchor="middle" font-size="9.5" font-weight="700" fill="#00709e">ERROR</text>
+            <rect x="108" y="64" width="80" height="22" rx="11" fill="#fef4e6" stroke="#f2d5a8"/>
+            <text x="148" y="79" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b45309">WARNING</text>
+            <rect x="196" y="64" width="64" height="22" rx="11" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="228" y="79" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8b93ab">LOG 2</text>
+            <text x="150" y="118" text-anchor="middle" font-size="9.5" fill="#5b7089">combina filtros de texto, nivel y fuente</text>
+          </svg>
+          <figcaption>Filtra sin perder el contexto temporal.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 6. Renombrar e ir a línea -->
+      <div class="help-row">
+        <div class="help-term"><h4>Renombrar fuentes e ir a una línea</h4><em>etiquetas · salto exacto</em></div>
+        <div class="help-desc">
+          <p>El nombre de archivo no siempre dice qué estación es. <b>Haz clic en el nombre</b> de una fuente (panel «Fuentes de datos») para editarlo: escribe el nuevo nombre y pulsa <kbd>Enter</kbd> (<kbd>Esc</kbd> cancela). El color y los datos no cambian; solo la etiqueta, que se usa en la lista, la correlación y la exportación.</p>
+          <p>En la barra de la línea de tiempo, el bloque <b>«Ir a línea»</b> permite saltar a un número de línea original de un archivo concreto: elige la fuente, escribe el número y pulsa <kbd>Enter</kbd>. Si la línea exacta está oculta por un filtro, se avisa y se salta al mensaje visible más próximo.</p>
+          <span class="help-fx">fuente + nº de línea → se busca por bisección y se centra en la lista</span>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Renombrar fuente e ir a línea">
+            <rect x="14" y="20" width="150" height="24" rx="6" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="24" y="36" font-size="10" fill="#8b93ab">s9_original.log</text>
+            <text x="176" y="36" font-size="12" font-weight="700" fill="#008cc5">→ ✎</text>
+            <rect x="200" y="20" width="86" height="24" rx="6" fill="#e3f3fa" stroke="#008cc5"/>
+            <text x="243" y="36" text-anchor="middle" font-size="10" font-weight="700" fill="#00709e">amasadora</text>
+            <line x1="14" y1="62" x2="286" y2="62" stroke="#eaeef6"/>
+            <rect x="14" y="82" width="120" height="24" rx="6" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="74" y="98" text-anchor="middle" font-size="10" fill="#5b7089">fuente ▾</text>
+            <rect x="142" y="82" width="70" height="24" rx="6" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="177" y="98" text-anchor="middle" font-size="10" font-family="monospace" fill="#5b7089">12345</text>
+            <rect x="220" y="82" width="66" height="24" rx="6" fill="#054cd9"/>
+            <text x="253" y="98" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Ir a línea</text>
+            <text x="150" y="134" text-anchor="middle" font-size="9.5" fill="#5b7089">salta y marca ese mensaje dentro del contexto global</text>
+          </svg>
+          <figcaption>Etiquetas legibles y salto directo por número de línea.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 7. Rendimiento -->
+      <div class="help-row">
+        <div class="help-term"><h4>Archivos grandes</h4><em>streaming · virtualización</em></div>
+        <div class="help-desc">
+          <p>Los logs de producción pueden tener cientos de MB y millones de líneas. El visor:</p>
+          <ul>
+            <li>Lee cada archivo en <b>streaming</b>, sin cargarlo entero en memoria de golpe.</li>
+            <li>Guarda los eventos en <b>arrays tipados</b> compactos.</li>
+            <li>Dibuja solo las filas visibles (<b>lista virtualizada</b>), así que desplazarse por 3 millones de líneas es fluido.</li>
+            <li>Fusiona las fuentes por timestamp mediante un <b>merge k-vías</b>, aprovechando que cada log ya viene ordenado.</li>
+          </ul>
+          <p>Aun así, cargar cientos de MB puede tardar unos segundos: verás una barra de progreso y podrás <b>cancelar</b>.</p>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Streaming y virtualización">
+            <rect x="16" y="30" width="60" height="80" rx="6" fill="#e8eef6" stroke="#9db0c6"/>
+            <text x="46" y="74" text-anchor="middle" font-size="10" font-weight="700" fill="#31435a">.log</text>
+            <path d="M80 70 L110 70" stroke="#008cc5" stroke-width="1.6"/>
+            <path d="M105 65 L113 70 L105 75" fill="none" stroke="#008cc5" stroke-width="1.6"/>
+            <rect x="116" y="44" width="70" height="52" rx="6" fill="#e3f3fa" stroke="#008cc5"/>
+            <text x="151" y="74" text-anchor="middle" font-size="10" font-weight="700" fill="#00709e">parser</text>
+            <path d="M190 70 L220 70" stroke="#008cc5" stroke-width="1.6"/>
+            <path d="M215 65 L223 70 L215 75" fill="none" stroke="#008cc5" stroke-width="1.6"/>
+            <g>
+              <rect x="228" y="34" width="56" height="10" rx="2" fill="#0f9d63" opacity=".8"/>
+              <rect x="228" y="50" width="56" height="10" rx="2" fill="#008cc5" opacity=".8"/>
+              <rect x="228" y="66" width="56" height="10" rx="2" fill="#b45309" opacity=".8"/>
+              <rect x="228" y="82" width="56" height="10" rx="2" fill="#008cc5" opacity=".5"/>
+            </g>
+            <text x="150" y="136" text-anchor="middle" font-size="9.5" fill="#5b7089">solo se dibujan las filas visibles</text>
+          </svg>
+          <figcaption>Lectura por trozos y render bajo demanda.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 8. Exportar -->
+      <div class="help-row">
+        <div class="help-term"><h4>Exportar resultados</h4><em>txt · csv · portapapeles</em></div>
+        <div class="help-desc">
+          <p>Todo se exporta desde la <b>vista filtrada</b> y en orden cronológico:</p>
+          <ul>
+            <li><b>.txt</b> — réplica legible de la línea de tiempo: <code>fecha -> [fuente] nivel: mensaje</code>.</li>
+            <li><b>.csv</b> — tabla con las columnas <code>fecha_hora, delta_ms, fuente, nivel, mensaje, linea</code>, con BOM UTF-8 para que Excel lo abra bien.</li>
+            <li><b>Copiar vista</b> — las mismas columnas en TSV al portapapeles, listo para pegar en una hoja de cálculo (hasta 200 000 filas).</li>
+            <li><b>Copiar selección</b> — solo el ancla y el segundo punto, con su Δt.</li>
+          </ul>
+          <span class="help-fx">delta_ms = t(fila) − t(fila anterior de la vista)</span>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Formatos de exportación">
+            <rect x="14" y="24" width="120" height="92" rx="7" fill="#f3f6fb" stroke="#dde3ee"/>
+            <text x="74" y="46" text-anchor="middle" font-size="10" font-weight="700" fill="#5b7089">vista filtrada</text>
+            <text x="74" y="66" text-anchor="middle" font-size="9.5" fill="#8b93ab">1 fila = 1 mensaje</text>
+            <text x="74" y="82" text-anchor="middle" font-size="9.5" fill="#8b93ab">orden por tiempo</text>
+            <path d="M140 70 L176 70" stroke="#008cc5" stroke-width="1.6"/>
+            <path d="M171 65 L179 70 L171 75" fill="none" stroke="#008cc5" stroke-width="1.6"/>
+            <g font-size="9.5" font-weight="700">
+              <rect x="188" y="26" width="98" height="20" rx="5" fill="#e3f3fa" stroke="#008cc5"/><text x="237" y="40" text-anchor="middle" fill="#00709e">.txt legible</text>
+              <rect x="188" y="54" width="98" height="20" rx="5" fill="#e6f7ef" stroke="#0f9d63"/><text x="237" y="68" text-anchor="middle" fill="#0f9d63">.csv columnas</text>
+              <rect x="188" y="82" width="98" height="20" rx="5" fill="#e8effc" stroke="#054cd9"/><text x="237" y="96" text-anchor="middle" fill="#054cd9">portapapeles TSV</text>
+            </g>
+            <text x="150" y="136" text-anchor="middle" font-size="9.5" fill="#5b7089">los tres respetan filtros y orden</text>
+          </svg>
+          <figcaption>Tres salidas, un mismo conjunto de filas.</figcaption>
+        </figure>
+      </div>
+
+      <!-- 9. Atajos -->
+      <div class="help-row">
+        <div class="help-term"><h4>Atajos de teclado</h4><em>navegación rápida</em></div>
+        <div class="help-desc">
+          <ul>
+            <li><kbd>↑</kbd> / <kbd>↓</kbd> — mover el ancla un mensaje.</li>
+            <li><kbd>PgUp</kbd> / <kbd>PgDn</kbd> — saltar una pantalla.</li>
+            <li><kbd>Home</kbd> / <kbd>End</kbd> — ir al primer o último mensaje.</li>
+            <li><kbd>Enter</kbd> / <kbd>Shift</kbd>+<kbd>Enter</kbd> — siguiente / anterior coincidencia de búsqueda.</li>
+            <li><kbd>Esc</kbd> — limpiar la selección.</li>
+          </ul>
+        </div>
+        <figure class="help-fig">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Atajos de teclado">
+            <g font-family="monospace" font-size="11" font-weight="700" fill="#3b5169">
+              <rect x="60" y="26" width="30" height="24" rx="5" fill="#f3f6fb" stroke="#dde3ee"/><text x="75" y="43" text-anchor="middle">↑</text>
+              <rect x="98" y="26" width="30" height="24" rx="5" fill="#f3f6fb" stroke="#dde3ee"/><text x="113" y="43" text-anchor="middle">↓</text>
+              <rect x="150" y="26" width="52" height="24" rx="5" fill="#f3f6fb" stroke="#dde3ee"/><text x="176" y="43" text-anchor="middle">Enter</text>
+              <rect x="210" y="26" width="42" height="24" rx="5" fill="#f3f6fb" stroke="#dde3ee"/><text x="231" y="43" text-anchor="middle">Esc</text>
+            </g>
+            <text x="150" y="86" text-anchor="middle" font-size="10" fill="#5b7089">mueve el ancla y recorre coincidencias sin tocar el ratón</text>
+            <text x="150" y="112" text-anchor="middle" font-size="10" fill="#5b7089">el foco debe estar fuera de los campos de texto</text>
+          </svg>
+          <figcaption>Navegación pensada para investigar rápido.</figcaption>
+        </figure>
+      </div>
+
+    </div>
+    <div class="help-note">
+      <b>Consejo:</b> empieza por un <b>ERROR</b> o un <b>WARNING</b>, fíjalo como ancla y mira la correlación para saber qué estación estaba haciendo algo justo antes. Repite saltando de una fuente a otra: así se reconstruye la secuencia completa del fallo.
+    </div>
+  </div>
+</section>
+
+<main class="layout">
+
+  <!-- ==================== CONTROLES ==================== -->
+  <div class="controls-col">
+
+    <!-- Fuentes -->
+    <section class="panel">
+      <div class="panel-head"><h2>Fuentes de datos</h2><span class="badge" id="srcBadge">0 archivos</span></div>
+      <div class="panel-body">
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Cargar archivos de log">
+          <span class="ico">⇪</span>
+          <div class="big">Arrastra aquí tus .log o .txt</div>
+          <div class="small">o haz clic para elegirlos · puedes cargar 2 o más a la vez · todo se procesa en local</div>
+        </div>
+        <input type="file" id="fileInput" class="hidden" multiple accept=".log,.txt,text/plain">
+
+        <div class="progress-wrap hidden" id="progWrap">
+          <div class="progress"><i id="progBar"></i></div>
+          <div class="progress-label"><span id="progName">—</span><span id="progPct">0 %</span></div>
+        </div>
+
+        <div class="src-list" id="srcList"></div>
+
+        <div class="btn-row">
+          <button type="button" class="btn sm" id="cancelBtn" disabled>Cancelar carga</button>
+          <button type="button" class="btn sm danger" id="clearBtn" disabled>Vaciar todo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filtros -->
+    <section class="panel">
+      <div class="panel-head"><h2>Filtros</h2><span class="badge" id="filterBadge">sin filtro</span></div>
+      <div class="panel-body">
+
+        <div class="field">
+          <div class="field-head"><label for="filterInput">Filtrar la línea de tiempo</label><span class="unit">texto</span></div>
+          <div class="input-action">
+            <input type="text" id="filterInput" placeholder="p. ej. PartID, lote, código de alarma…" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn sm primary" id="filterApply">Aplicar filtro</button>
+          </div>
+          <div class="btn-row" style="margin-top:8px">
+            <label class="chk"><input type="checkbox" id="filterRegex"> regex</label>
+            <label class="chk"><input type="checkbox" id="filterCase"> distinguir mayúsculas</label>
+          </div>
+          <div class="hint" id="filterHint">Escribe y pulsa <b>Aplicar filtro</b> (o <kbd>Enter</kbd>). Se aplica sobre el mensaje; vacío = sin filtro.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label for="searchInput">Buscar y resaltar</label><span class="unit">no oculta</span></div>
+          <div class="input-action">
+            <input type="text" id="searchInput" placeholder="texto a resaltar…" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn sm primary" id="searchApply">Buscar</button>
+          </div>
+          <div class="btn-row" style="margin-top:8px">
+            <button type="button" class="btn sm" id="searchPrev">◀ Anterior</button>
+            <button type="button" class="btn sm" id="searchNext">Siguiente ▶</button>
+            <span class="badge mute" id="searchCount">0</span>
+          </div>
+          <div class="btn-row" style="margin-top:6px">
+            <label class="chk"><input type="checkbox" id="searchRegex"> regex</label>
+            <label class="chk"><input type="checkbox" id="searchCase"> mayúsculas</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label>Niveles</label><span class="unit" id="lvlAllWrap"><button type="button" class="btn sm" id="lvlAll" style="padding:2px 7px">todos</button></span></div>
+          <div class="chips" id="lvlChips"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label for="gapInput">Umbral de hueco</label><span class="unit">ms</span></div>
+          <input type="number" id="gapInput" min="0" step="50" value="1000">
+          <div class="hint">Marca con una línea ámbar los saltos entre mensajes consecutivos mayores que este valor. 0 = desactivado.</div>
+        </div>
+
+        <div class="field">
+          <label class="chk"><input type="checkbox" id="collapseChk"> Colapsar duplicados consecutivos</label>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Medición -->
+    <section class="panel">
+      <div class="panel-head"><h2>Medición de tiempos</h2><span class="badge" id="deltaBadge">Δ desde anterior</span></div>
+      <div class="panel-body">
+        <div class="field">
+          <div class="field-head"><label>Columna Δ de la lista</label><span class="unit">referencia</span></div>
+          <span class="seg" id="deltaSeg">
+            <button type="button" data-m="prev" class="active">Desde anterior</button>
+            <button type="button" data-m="anchor">Desde ancla</button>
+          </span>
+        </div>
+
+        <div class="measure-grid">
+          <div class="measure-card a"><div class="k">Ancla (A)</div><div class="v" id="mA">—</div></div>
+          <div class="measure-card b"><div class="k">Segundo punto (B)</div><div class="v" id="mB">—</div></div>
+        </div>
+        <div class="delta-big"><span class="k">Δt = B − A</span><span class="v" id="mDelta">—</span></div>
+        <div class="hint">Clic = ancla · <kbd>Shift</kbd>+clic = segundo punto.</div>
+
+        <div class="spec-block">
+          <div class="spec-title">Correlación: evento más cercano por estación</div>
+          <div class="corr" id="corrList"></div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn sm" id="clearSelBtn">Limpiar selección</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Estadísticas -->
+    <section class="panel">
+      <div class="panel-head"><h2>Estadísticas</h2><span class="badge" id="statBadge">—</span></div>
+      <div class="panel-body">
+        <div class="metrics" id="globalStats"></div>
+        <div class="spec-block">
+          <div class="spec-title">Por fuente</div>
+          <div id="srcStats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Exportar -->
+    <section class="panel">
+      <div class="panel-head"><h2>Exportar</h2><span class="badge mute" id="exportBadge">resultado filtrado</span></div>
+      <div class="panel-body">
+        <div class="btn-row" style="margin-top:0">
+          <button type="button" class="btn primary" id="exportBtn" disabled>Descargar .txt</button>
+          <button type="button" class="btn" id="exportCsvBtn" disabled>Descargar .csv</button>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="copyViewBtn" disabled>Copiar vista al portapapeles</button>
+          <button type="button" class="btn" id="copySelBtn" disabled>Copiar selección</button>
+        </div>
+        <div class="hint">Exporta exactamente lo que ves tras aplicar filtros, en orden cronológico. El <b>.txt</b> replica la línea de tiempo legible; el <b>.csv</b> y el portapapeles usan columnas: <code>fecha_hora, delta_ms, fuente, nivel, mensaje, linea</code>.</div>
+        <div class="hint warn-text hidden" id="exportStatus"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==================== RESULTADOS ==================== -->
+  <div>
+
+    <!-- Actividad -->
+    <section class="panel">
+      <div class="panel-head"><h2>Actividad en el tiempo</h2><span class="badge" id="actBadge">—</span></div>
+      <div class="chart-wrap"><canvas id="activity"></canvas></div>
+      <div class="chart-legend" id="chartLegend"></div>
+    </section>
+
+    <!-- Línea de tiempo -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Línea de tiempo combinada</h2>
+        <span class="badge" id="tlBadge">0 mensajes</span>
+      </div>
+      <div class="tl-toolbar">
+        <button type="button" class="btn sm" id="goStart">⤒ Inicio</button>
+        <button type="button" class="btn sm" id="goEnd">Fin ⤓</button>
+        <span class="goto">
+          <select id="gotoSrc" title="Fuente"></select>
+          <input type="number" id="gotoLine" min="1" step="1" placeholder="línea" title="Número de línea original del archivo">
+          <button type="button" class="btn sm" id="gotoBtn">Ir a línea</button>
+        </span>
+        <span class="grow"></span>
+        <span class="goto-msg" id="gotoMsg"></span>
+        <span class="badge mute" id="tlInfo">—</span>
+      </div>
+      <div class="tl-head">
+        <span>Hora</span><span>Δ</span><span>Fuente</span><span>Nivel</span><span>Mensaje</span><span>Línea</span>
+      </div>
+      <div class="tl-scroll" id="tlScroll" tabindex="0">
+        <div class="tl-spacer" id="tlSpacer"><div class="tl-rows" id="tlRows"></div></div>
+      </div>
+      <div class="panel-body" id="detailWrap" style="border-top:1px solid var(--line-2)">
+        <div class="detail-head" id="detailHead"><span class="tag">Detalle</span><span class="hint" style="margin:0">Selecciona un mensaje de la lista para verlo completo.</span></div>
+        <div class="detail-msg hidden" id="detailMsg"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =====================================================================
+     VISOR DE LOGS · CORRELACIÓN ENTRE ESTACIONES
+     ---------------------------------------------------------------------
+     Objetivo: cargar varios archivos .log/.txt, extraer de cada línea su
+     marca de tiempo, y construir una ÚNICA secuencia cronológica que
+     intercale los mensajes de todas las fuentes.
+
+     Decisiones de diseño (rendimiento con millones de líneas):
+       · Lectura en STREAMING: nunca se guarda el archivo entero como
+         string gigante; se decodifica por trozos y se parte por '\n'.
+       · Almacenamiento en ARRAYS TIPADOS (Float64/Uint8/Uint32) para las
+         marcas de tiempo, nivel y número de línea; los textos van a un
+         Array normal. Así 3 M de líneas ocupan cientos de MB, no GB.
+       · MERGE K-VÍAS: como cada log ya viene ordenado, en lugar de hacer
+         un sort global O(n log n) se fusionan las k listas ordenadas.
+       · RENDER VIRTUALIZADO: solo se pintan las ~40 filas visibles.
+     ===================================================================== */
+
+  /* =====================================================================
+     1. CONSTANTES Y METADATOS
+     ===================================================================== */
+
+  /* Paleta de colores para las fuentes. Se reparte en orden de carga. */
+  const PALETTE = ['#054cd9','#0f9d63','#b45309','#7c3aed','#c0392b',
+                   '#0891b2','#db2777','#4d7c0f','#475569','#008cc5',
+                   '#9333ea','#ea580c','#0d9488','#4338ca','#be123c'];
+
+  /* Niveles reconocidos. El índice es el valor que se guarda en Uint8. */
+  const LEVELS = [
+    {name:'Otros',    short:'—',    cls:'lv-other'},
+    {name:'LOG 1',    short:'L1',   cls:'lv-1'},
+    {name:'LOG 2',    short:'L2',   cls:'lv-2'},
+    {name:'LOG 3',    short:'L3',   cls:'lv-3'},
+    {name:'LOG 4',    short:'L4',   cls:'lv-4'},
+    {name:'LOG 5',    short:'L5',   cls:'lv-5'},
+    {name:'INFO',     short:'INFO', cls:'lv-info'},
+    {name:'WARNING',  short:'WARN', cls:'lv-warn'},
+    {name:'ERROR',    short:'ERR',  cls:'lv-error'},
+    {name:'DEBUG',    short:'DBG',  cls:'lv-debug'},
+    {name:'TRACE',    short:'TRC',  cls:'lv-trace'},
+    {name:'CRITICAL', short:'CRIT', cls:'lv-crit'}
+  ];
+
+  /* Alto de fila en px. Debe coincidir EXACTAMENTE con .tl-row{height}. */
+  const ROW_H = 22;
+  /* Tope de coincidencias de búsqueda almacenadas (para no agotar memoria). */
+  const MAX_MATCHES = 500000;
+
+  /* =====================================================================
+     2. UTILIDADES
+     ===================================================================== */
+  const $ = id => document.getElementById(id);
+  const pad = (n, l) => String(n).padStart(l, '0');
+
+  /* Escapa HTML para insertar texto de usuario sin romper el DOM. */
+  const ESC = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  const escapeHtml = s => s.replace(/[&<>"']/g, c => ESC[c]);
+
+  /* Hora de reloj a partir de un timestamp. Usamos getUTC* porque las
+     marcas de los logs son hora local de la máquina que los escribió:
+     al construirlas con Date.UTC y mostrarlas en UTC, el reloj coincide
+     exactamente con el del log, sin desfases de zona horaria. */
+  const formatClock = ts => {
+    const d = new Date(ts);
+    return pad(d.getUTCHours(),2)+':'+pad(d.getUTCMinutes(),2)+':'+pad(d.getUTCSeconds(),2)+'.'+pad(d.getUTCMilliseconds(),3);
+  };
+  const formatDate = ts => {
+    const d = new Date(ts);
+    return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1,2)+'-'+pad(d.getUTCDate(),2);
+  };
+  const formatStamp = ts => formatDate(ts)+' '+formatClock(ts);
+
+  /* Duración legible: ms → ms/s/min/h según magnitud. */
+  function formatDur(ms){
+    const sign = ms < 0 ? '−' : '';
+    const a = Math.abs(ms);
+    if (a < 1) return sign + a.toFixed(2) + ' ms';
+    if (a < 1000) return sign + a.toFixed(a < 10 ? 1 : 0) + ' ms';
+    if (a < 60000) return sign + (a/1000).toFixed(2) + ' s';
+    const s = Math.floor(a/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+    if (h > 0) return sign + h + 'h ' + pad(m%60,2) + 'm ' + pad(s%60,2) + 's';
+    return sign + m + 'm ' + pad(s%60,2) + 's';
+  }
+
+  function formatBytes(n){
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n/1024).toFixed(1) + ' KB';
+    if (n < 1073741824) return (n/1048576).toFixed(1) + ' MB';
+    return (n/1073741824).toFixed(2) + ' GB';
+  }
+
+  const formatInt = n => n.toLocaleString('es-ES');
+
+  function debounce(fn, wait){
+    let t;
+    return function(){ const args = arguments; clearTimeout(t); t = setTimeout(() => fn.apply(null, args), wait); };
+  }
+
+  /* =====================================================================
+     3. PARSER
+     ---------------------------------------------------------------------
+     Formato principal (rápido, sin regex):
+       YYYY-MM-DD, HH:MM:SS:mmm -> <resto>
+     La ruta rápida comprueba posiciones fijas y suma dígitos; solo si
+     falla se recurre a una expresión regular más tolerante.
+     ===================================================================== */
+
+  /* Devuelve el número formado por `len` dígitos en `pos`, o -1 si hay
+     algún carácter que no sea dígito. */
+  function readDigits(str, pos, len){
+    let v = 0;
+    for (let i = 0; i < len; i++){
+      const c = str.charCodeAt(pos + i);
+      if (c < 48 || c > 57) return -1;
+      v = v*10 + (c - 48);
+    }
+    return v;
+  }
+
+  /* Ruta rápida: "2026-09-23, 05:55:11:144 -> ". Devuelve {ms,start} o null. */
+  function parseTsFast(line){
+    if (line.length < 28) return null;
+    if (line.charCodeAt(4) !== 45 || line.charCodeAt(7) !== 45 || line.charCodeAt(10) !== 44) return null;
+    if (line.charCodeAt(14) !== 58 || line.charCodeAt(17) !== 58 || line.charCodeAt(20) !== 58) return null;
+    if (line.charCodeAt(24) !== 32 || line.charCodeAt(25) !== 45 || line.charCodeAt(26) !== 62 || line.charCodeAt(27) !== 32) return null;
+    const y = readDigits(line, 0, 4);
+    if (y < 0) return null;
+    const mo = readDigits(line, 5, 2);
+    const d  = readDigits(line, 8, 2);
+    const h  = readDigits(line, 12, 2);
+    const mi = readDigits(line, 15, 2);
+    const s  = readDigits(line, 18, 2);
+    const ms = readDigits(line, 21, 3);
+    if (mo < 0 || d < 0 || h < 0 || mi < 0 || s < 0 || ms < 0) return null;
+    return { ms: Date.UTC(y, mo-1, d, h, mi, s, ms), start: 28 };
+  }
+
+  /* Ruta tolerante para otros formatos de fecha/hora. */
+  const TS_RE = /^(\d{4})-(\d{2})-(\d{2})[ ,]+(\d{1,2}):(\d{2}):(\d{2})[:.,](\d{1,3})\s*->\s*/;
+  function parseTsRegex(line){
+    const m = TS_RE.exec(line);
+    if (!m) return null;
+    return {
+      ms: Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6], +m[7].padEnd(3,'0')),
+      start: m[0].length
+    };
+  }
+
+  /* Detecta el nivel a partir del prefijo y devuelve {lvl, text}. */
+  function levelOf(rest){
+    if (rest.startsWith('LOG ')){
+      const c = rest.charCodeAt(4);
+      if (c >= 49 && c <= 53 && rest.charCodeAt(5) === 58)
+        return { lvl: c - 48, text: rest.slice(6).replace(/^ /,'') };
+    }
+    if (rest.startsWith('WARNING:'))  return { lvl: 7,  text: rest.slice(8).replace(/^ /,'') };
+    if (rest.startsWith('ERROR:'))    return { lvl: 8,  text: rest.slice(6).replace(/^ /,'') };
+    if (rest.startsWith('INFO:'))     return { lvl: 6,  text: rest.slice(5).replace(/^ /,'') };
+    if (rest.startsWith('DEBUG:'))    return { lvl: 9,  text: rest.slice(6).replace(/^ /,'') };
+    if (rest.startsWith('TRACE:'))    return { lvl: 10, text: rest.slice(6).replace(/^ /,'') };
+    if (rest.startsWith('CRITICAL:')) return { lvl: 11, text: rest.slice(9).replace(/^ /,'') };
+    if (rest.startsWith('FATAL:'))    return { lvl: 11, text: rest.slice(6).replace(/^ /,'') };
+    return { lvl: 0, text: rest };
+  }
+
+  /* =====================================================================
+     4. ALMACENAMIENTO
+     ---------------------------------------------------------------------
+     Cada fuente guarda sus eventos en arrays paralelos:
+       ts[]   Float64  marca de tiempo (ms)
+       lvl[]  Uint8    nivel
+       line[] Uint32   número de línea original
+       msg[]  string[] mensaje ya sin el prefijo de nivel
+     ===================================================================== */
+
+  /* Arrays tipados que crecen solos (duplican capacidad). */
+  function GrowF64(){ this.a = new Float64Array(4096); this.n = 0; }
+  GrowF64.prototype.push = function(v){ if (this.n === this.a.length){ const b = new Float64Array(this.a.length*2); b.set(this.a); this.a = b; } this.a[this.n++] = v; };
+
+  function GrowU8(){ this.a = new Uint8Array(4096); this.n = 0; }
+  GrowU8.prototype.push = function(v){ if (this.n === this.a.length){ const b = new Uint8Array(this.a.length*2); b.set(this.a); this.a = b; } this.a[this.n++] = v; };
+
+  function GrowU32(){ this.a = new Uint32Array(4096); this.n = 0; }
+  GrowU32.prototype.push = function(v){ if (this.n === this.a.length){ const b = new Uint32Array(this.a.length*2); b.set(this.a); this.a = b; } this.a[this.n++] = v; };
+
+  const sources = [];              // lista de fuentes cargadas
+  let srcSeq = 0;                  // contador para nombres/colores
+
+  const state = {
+    gTs: new Float64Array(0),      // eventos combinados ordenados
+    gSrc: new Uint8Array(0),
+    gLvl: new Uint8Array(0),
+    gLine: new Uint32Array(0),
+    gMsg: [],
+    total: 0,
+    minTs: 0, maxTs: 0,
+    view: new Uint32Array(0),      // subconjunto visible (índices globales)
+    viewN: 0,
+    viewBuf: new Uint32Array(0),
+    matches: null,                 // posiciones (en view) que coinciden con la búsqueda
+    matchN: 0, matchPos: -1,
+    anchor: -1,                    // índice global del ancla
+    second: -1,                    // índice global del segundo punto
+    deltaMode: 'prev',
+    gapMs: 1000,
+    collapse: false,
+    loading: false,
+    cancel: false,
+    filterText: '', filterRegex: false, filterCase: false,
+    searchText: '', searchRegex: false, searchCase: false,
+    searchRe: null, searchNeedle: '',
+    levelOn: new Uint8Array(LEVELS.length).fill(1),
+    parseMs: 0
+  };
+
+  /* =====================================================================
+     5. LECTURA DE ARCHIVOS EN STREAMING
+     ===================================================================== */
+
+  /* Procesa un archivo completo línea a línea sin cargarlo entero. */
+  async function parseFile(file, src, onProgress){
+    const gts = new GrowF64(), glv = new GrowU8(), gln = new GrowU32();
+    const gmsg = [];
+    const lvlCounts = src.lvlCounts;
+    let count = 0, lastTs = -Infinity, sorted = true, lineNo = 0;
+
+    function addLine(raw){
+      lineNo++;
+      let line = raw;
+      if (line.charCodeAt(line.length - 1) === 13) line = line.slice(0, -1);   // CRLF
+      if (line.length === 0) return;
+
+      const ts = parseTsFast(line) || parseTsRegex(line);
+      if (ts){
+        const lv = levelOf(line.slice(ts.start));
+        if (ts.ms < lastTs) sorted = false;
+        lastTs = ts.ms;
+        gts.push(ts.ms); glv.push(lv.lvl); gln.push(lineNo); gmsg.push(lv.text);
+        lvlCounts[lv.lvl]++; count++;
+      } else if (count > 0){
+        /* Línea sin timestamp (continuación / stack trace): se anexa al
+           mensaje anterior para no perder información. */
+        gmsg[count-1] += '\n' + line;
+      }
+    }
+
+    const reader = file.stream().getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buf = '', bytes = 0, first = true, lastYield = performance.now();
+
+    try {
+      while (true){
+        const r = await reader.read();
+        if (state.cancel){ await reader.cancel(); return false; }
+        if (r.done) break;
+        bytes += r.value.length;
+        buf += decoder.decode(r.value, {stream:true});
+        if (first){ if (buf.charCodeAt(0) === 0xFEFF) buf = buf.slice(1); first = false; }
+
+        let start = 0, idx;
+        while ((idx = buf.indexOf('\n', start)) !== -1){
+          addLine(buf.slice(start, idx));
+          start = idx + 1;
+        }
+        if (start) buf = buf.slice(start);
+
+        if (onProgress) onProgress(bytes / (file.size || 1));
+        /* Cede el hilo cada 40 ms para que la UI siga respondiendo. */
+        if (performance.now() - lastYield > 40){ await new Promise(r => setTimeout(r, 0)); lastYield = performance.now(); }
+      }
+      buf += decoder.decode();
+      if (buf.length) addLine(buf);
+    } finally {
+      try { reader.releaseLock(); } catch(e){}
+    }
+
+    /* Ajustamos los arrays a su tamaño real para liberar el sobrante. */
+    src.ts = gts.a.slice(0, count);
+    src.lvl = glv.a.slice(0, count);
+    src.line = gln.a.slice(0, count);
+    src.msg = gmsg;
+    src.count = count;
+    src.sorted = sorted;
+    return true;
+  }
+
+  /* Ordena una fuente por timestamp (solo si no venía ordenada). */
+  function sortSource(src){
+    const n = src.count;
+    const idx = new Uint32Array(n);
+    for (let i = 0; i < n; i++) idx[i] = i;
+    const ts = src.ts, ln = src.line;
+    idx.sort((a,b) => (ts[a]-ts[b]) || (ln[a]-ln[b]));
+    const nts = new Float64Array(n), nl = new Uint8Array(n), nln = new Uint32Array(n), nm = new Array(n);
+    for (let i = 0; i < n; i++){
+      const j = idx[i];
+      nts[i] = src.ts[j]; nl[i] = src.lvl[j]; nln[i] = src.line[j]; nm[i] = src.msg[j];
+    }
+    src.ts = nts; src.lvl = nl; src.line = nln; src.msg = nm;
+  }
+
+  /* ¿Los números de línea son crecientes? Permite buscar por bisección. */
+  function isMonotonicLines(lines, n){
+    for (let i = 1; i < n; i++) if (lines[i] < lines[i-1]) return false;
+    return true;
+  }
+
+  /* =====================================================================
+     6. MERGE K-VÍAS Y ESTADO GLOBAL
+     ===================================================================== */
+
+  /* Fusiona las fuentes (cada una ordenada) en arrays globales ordenados.
+     En caso de empate de timestamp se respeta el número de línea original
+     y, si tampoco, el orden de las fuentes. */
+  function recomputeGlobals(){
+    const active = sources.filter(s => s.count > 0);
+    const k = active.length;
+    const total = active.reduce((a,s) => a + s.count, 0);
+
+    const gTs = new Float64Array(total), gLvl = new Uint8Array(total),
+          gLine = new Uint32Array(total), gSrc = new Uint8Array(total);
+    const gMsg = new Array(total);
+    const ptr = new Uint32Array(k);
+    let minTs = Infinity, maxTs = -Infinity;
+
+    for (let i = 0; i < total; i++){
+      let best = -1, bestTs = Infinity, bestLine = Infinity;
+      for (let s = 0; s < k; s++){
+        const p = ptr[s];
+        if (p >= active[s].count) continue;
+        const t = active[s].ts[p];
+        if (t < bestTs || (t === bestTs && active[s].line[p] < bestLine)){
+          best = s; bestTs = t; bestLine = active[s].line[p];
+        }
+      }
+      const s = best, p = ptr[s];
+      gTs[i] = active[s].ts[p]; gLvl[i] = active[s].lvl[p];
+      gLine[i] = active[s].line[p]; gSrc[i] = s; gMsg[i] = active[s].msg[p];
+      ptr[s]++;
+      if (bestTs < minTs) minTs = bestTs;
+      if (bestTs > maxTs) maxTs = bestTs;
+    }
+
+    state.gTs = gTs; state.gLvl = gLvl; state.gLine = gLine;
+    state.gSrc = gSrc; state.gMsg = gMsg; state.total = total;
+    state.minTs = total ? minTs : 0; state.maxTs = total ? maxTs : 0;
+    state.viewBuf = new Uint32Array(total);
+  }
+
+  /* =====================================================================
+     7. FILTRADO Y BÚSQUEDA
+     ===================================================================== */
+
+  function buildView(){
+    const n = state.total;
+    if (state.viewBuf.length < n) state.viewBuf = new Uint32Array(n);
+    const out = state.viewBuf;
+    let m = 0;
+
+    const text = state.filterText;
+    let re = null, needle = '';
+    if (text){
+      if (state.filterRegex){ try { re = new RegExp(text, state.filterCase ? '' : 'i'); } catch(e){ re = null; } }
+      else needle = state.filterCase ? text : text.toLowerCase();
+    }
+
+    let lastSrc = -1, lastMsg = null;
+    for (let i = 0; i < n; i++){
+      const s = state.gSrc[i];
+      if (!sources[s].enabled) continue;
+      if (!state.levelOn[state.gLvl[i]]) continue;
+
+      const msg = state.gMsg[i];
+      if (re){ if (!re.test(msg)) continue; }
+      else if (needle){ const hay = state.filterCase ? msg : msg.toLowerCase(); if (hay.indexOf(needle) === -1) continue; }
+
+      if (state.collapse){
+        if (s === lastSrc && msg === lastMsg) continue;
+        lastSrc = s; lastMsg = msg;
+      }
+      out[m++] = i;
+    }
+
+    state.view = out.subarray(0, m);
+    state.viewN = m;
+    state.matches = null; state.matchN = 0; state.matchPos = -1;
+    runSearch();
+  }
+
+  /* Busca coincidencias dentro de la vista (sin ocultar nada). */
+  function runSearch(){
+    const text = state.searchText;
+    state.searchRe = null; state.searchNeedle = '';
+    if (!text){ state.matches = null; state.matchN = 0; state.matchPos = -1; return; }
+
+    let re = null, needle = '';
+    if (state.searchRegex){ try { re = new RegExp(text, state.searchCase ? '' : 'i'); } catch(e){ re = null; } }
+    else needle = state.searchCase ? text : text.toLowerCase();
+    state.searchRe = re; state.searchNeedle = needle;
+
+    const out = [];
+    const view = state.view, vn = state.viewN, gMsg = state.gMsg;
+    for (let p = 0; p < vn; p++){
+      const msg = gMsg[view[p]];
+      let hit;
+      if (re) hit = re.test(msg);
+      else hit = (state.searchCase ? msg : msg.toLowerCase()).indexOf(needle) !== -1;
+      if (hit){ out.push(p); if (out.length >= MAX_MATCHES) break; }
+    }
+    state.matches = out; state.matchN = out.length; state.matchPos = -1;
+  }
+
+  /* Resalta las coincidencias de un mensaje crudo, devolviendo HTML seguro. */
+  function highlightRaw(raw){
+    const re = state.searchRe, needle = state.searchNeedle;
+    if (!re && !needle) return escapeHtml(raw);
+
+    const ranges = [];
+    if (re){
+      const g = new RegExp(re.source, re.flags.indexOf('g') === -1 ? re.flags + 'g' : re.flags);
+      let m;
+      while ((m = g.exec(raw))){
+        ranges.push([m.index, m.index + m[0].length]);
+        if (m[0].length === 0) g.lastIndex++;
+        if (ranges.length > 200) break;
+      }
+    } else {
+      const hay = state.searchCase ? raw : raw.toLowerCase();
+      let idx = 0;
+      while ((idx = hay.indexOf(needle, idx)) !== -1){
+        ranges.push([idx, idx + needle.length]);
+        idx += needle.length || 1;
+        if (ranges.length > 200) break;
+      }
+    }
+    if (!ranges.length) return escapeHtml(raw);
+
+    let out = '', last = 0;
+    for (let i = 0; i < ranges.length; i++){
+      const a = ranges[i][0], b = ranges[i][1];
+      if (a < last) continue;
+      out += escapeHtml(raw.slice(last, a)) + '<mark>' + escapeHtml(raw.slice(a, b)) + '</mark>';
+      last = b;
+    }
+    out += escapeHtml(raw.slice(last));
+    return out;
+  }
+
+  /* =====================================================================
+     8. RENDER: FUENTES, FILTROS, ESTADÍSTICAS
+     ===================================================================== */
+
+  function renderSources(){
+    const wrap = $('srcList');
+    if (!sources.length){
+      wrap.innerHTML = '<div class="empty">Aún no hay archivos cargados. Arrastra 2 o más logs para empezar a cruzarlos.</div>';
+    } else {
+      wrap.innerHTML = sources.map((s, i) =>
+        '<div class="src'+(s.enabled ? '' : ' dim')+'" data-i="'+i+'">' +
+          '<span class="swatch" style="background:'+s.color+'"></span>' +
+          '<label class="chk"><input type="checkbox" data-act="toggle" data-i="'+i+'"'+(s.enabled ? ' checked' : '')+'></label>' +
+          '<span class="name" data-act="rename" data-i="'+i+'" title="Clic para renombrar">'+escapeHtml(s.name)+'</span>' +
+          '<span class="meta">'+formatInt(s.count)+' líneas · '+formatBytes(s.size)+'</span>' +
+          '<button type="button" class="x" data-act="remove" data-i="'+i+'" title="Quitar">×</button>' +
+        '</div>'
+      ).join('');
+    }
+    $('srcBadge').textContent = sources.length + (sources.length === 1 ? ' archivo' : ' archivos');
+    $('clearBtn').disabled = !sources.length || state.loading;
+    renderGotoOptions();
+  }
+
+  /* Rellena el selector de fuentes del salto a línea. */
+  function renderGotoOptions(){
+    const sel = $('gotoSrc');
+    const prev = sel.value;
+    sel.innerHTML = sources.map((s, i) => '<option value="'+i+'">'+escapeHtml(s.name)+'</option>').join('');
+    if (prev !== '' && +prev < sources.length) sel.value = prev;
+  }
+
+  /* Convierte el nombre de una fuente en un campo editable in situ. */
+  function startRename(i, nameEl){
+    const src = sources[i];
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'rename-input';
+    input.value = src.name;
+    nameEl.replaceWith(input);
+    input.focus(); input.select();
+
+    let done = false;
+    const commit = save => {
+      if (done) return; done = true;
+      if (save){ const v = input.value.trim(); if (v) src.name = v; }
+      renderSources();
+      renderTimeline();
+      renderSelection();
+      renderChartLegend();
+      drawActivity();
+      updateBadges();
+    };
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter'){ e.preventDefault(); commit(true); }
+      else if (e.key === 'Escape'){ e.preventDefault(); commit(false); }
+    });
+    input.addEventListener('blur', () => commit(true));
+  }
+
+  function renderLevelChips(){
+    const wrap = $('lvlChips');
+    wrap.innerHTML = LEVELS.map((l, i) =>
+      '<span class="chip '+(state.levelOn[i] ? 'on' : 'off')+' '+l.cls+'" data-lvl="'+i+'">'+l.name+'</span>'
+    ).join('');
+  }
+
+  function renderStats(){
+    const g = $('globalStats');
+    if (!state.total){
+      g.innerHTML = '<div class="empty">Sin datos.</div>';
+      $('srcStats').innerHTML = '';
+      $('statBadge').textContent = '—';
+      return;
+    }
+    const span = state.maxTs - state.minTs;
+    let errs = 0, warns = 0;
+    for (let i = 0; i < state.total; i++){ const l = state.gLvl[i]; if (l === 8) errs++; else if (l === 7) warns++; }
+
+    g.innerHTML =
+      '<div class="metric emphasis"><span class="metric-label">Mensajes combinados</span><span class="metric-value">'+formatInt(state.total)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Ventana temporal</span><span class="metric-value">'+formatDur(span)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Desde</span><span class="metric-value" style="font-size:12px">'+formatStamp(state.minTs)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Hasta</span><span class="metric-value" style="font-size:12px">'+formatStamp(state.maxTs)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Errores</span><span class="metric-value" style="color:var(--bad)">'+formatInt(errs)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Avisos</span><span class="metric-value" style="color:var(--warn)">'+formatInt(warns)+'</span></div>' +
+      '<div class="metric"><span class="metric-label">Tiempo de parseo</span><span class="metric-value">'+(state.parseMs/1000).toFixed(2)+' s</span></div>';
+
+    $('srcStats').innerHTML = sources.map(s => {
+      const dur = s.count ? (s.ts[s.count-1] - s.ts[0]) : 0;
+      return '<div class="spec-row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+s.color+';margin-right:6px"></i>'+escapeHtml(s.name)+'</span><b>'+formatInt(s.count)+' · '+formatDur(dur)+'</b></div>';
+    }).join('');
+    $('statBadge').textContent = formatInt(state.total) + ' msgs';
+  }
+
+  function updateBadges(){
+    $('tlBadge').textContent = formatInt(state.viewN) + (state.viewN === 1 ? ' mensaje' : ' mensajes');
+    const filt = (state.filterText ? 1 : 0) + (!allLevelsOn() ? 1 : 0) + (sources.some(s => !s.enabled) ? 1 : 0) + (state.collapse ? 1 : 0);
+    $('filterBadge').textContent = filt ? filt + ' activo' + (filt > 1 ? 's' : '') : 'sin filtro';
+    $('filterBadge').className = 'badge' + (filt ? '' : ' mute');
+    $('loadBadge').textContent = state.total ? formatInt(state.total) + ' msgs · ' + sources.length + ' fuentes' : 'sin datos';
+    $('loadBadge').className = 'badge' + (state.total ? ' good' : ' mute');
+    $('tlInfo').textContent = state.total
+      ? formatInt(state.viewN) + ' de ' + formatInt(state.total) + ' · ' + formatStamp(state.minTs).slice(11) + ' → ' + formatStamp(state.maxTs).slice(11)
+      : '—';
+    $('exportBtn').disabled = !state.viewN;
+    $('exportCsvBtn').disabled = !state.viewN;
+    $('copyViewBtn').disabled = !state.viewN;
+    $('copySelBtn').disabled = state.anchor < 0;
+    $('searchCount').textContent = state.matchN ? formatInt(state.matchN) : '0';
+  }
+
+  const allLevelsOn = () => state.levelOn.every(v => v === 1);
+
+  /* =====================================================================
+     9. RENDER: LISTA VIRTUALIZADA
+     ===================================================================== */
+
+  const tlScroll = $('tlScroll'), tlSpacer = $('tlSpacer'), tlRows = $('tlRows');
+
+  function rowHtml(i, prevTs){
+    const ts = state.gTs[i], s = state.gSrc[i], lv = state.gLvl[i];
+    const src = sources[s];
+    const meta = LEVELS[lv];
+
+    let dt = '';
+    if (state.deltaMode === 'anchor'){
+      if (state.anchor >= 0 && state.anchor !== i) dt = formatDur(ts - state.gTs[state.anchor]);
+    } else if (!isNaN(prevTs)){
+      dt = formatDur(ts - prevTs);
+    }
+
+    const isGap = !isNaN(prevTs) && state.gapMs > 0 && (ts - prevTs) >= state.gapMs;
+    const sel = (i === state.anchor ? ' sel' : '') + (i === state.second ? ' sel2' : '');
+    const msg = highlightRaw(state.gMsg[i]);
+    const gapDot = isGap ? '<span class="gapdot" title="Hueco de '+formatDur(ts-prevTs)+'">⏱ </span>' : '';
+
+    return '<div class="tl-row'+sel+(isGap ? ' gap' : '')+'" data-i="'+i+'">' +
+      '<span class="c-time">'+formatClock(ts)+'</span>' +
+      '<span class="c-dt">'+dt+'</span>' +
+      '<span class="c-src"><i style="background:'+src.color+'"></i>'+escapeHtml(src.name)+'</span>' +
+      '<span class="c-lvl '+meta.cls+'">'+meta.short+'</span>' +
+      '<span class="c-msg">'+gapDot+msg+'</span>' +
+      '<span class="c-line">'+state.gLine[i]+'</span>' +
+    '</div>';
+  }
+
+  function updateVisible(){
+    const n = state.viewN;
+    if (!n){ tlRows.innerHTML = ''; return; }
+    const st = tlScroll.scrollTop, h = tlScroll.clientHeight;
+    const start = Math.max(0, Math.floor(st / ROW_H) - 3);
+    const end = Math.min(n, Math.ceil((st + h) / ROW_H) + 3);
+    tlRows.style.transform = 'translateY(' + (start * ROW_H) + 'px)';
+
+    const parts = [];
+    let prevTs = start > 0 ? state.gTs[state.view[start-1]] : NaN;
+    for (let p = start; p < end; p++){
+      const i = state.view[p];
+      parts.push(rowHtml(i, prevTs));
+      prevTs = state.gTs[i];
+    }
+    tlRows.innerHTML = parts.join('');
+  }
+
+  let rafPending = false;
+  function onScroll(){
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => { rafPending = false; updateVisible(); });
+  }
+
+  function renderTimeline(){
+    tlSpacer.style.height = (state.viewN * ROW_H) + 'px';
+    updateVisible();
+  }
+
+  function scrollToPos(pos){
+    if (pos < 0 || pos >= state.viewN) return;
+    tlScroll.scrollTop = Math.max(0, pos * ROW_H - tlScroll.clientHeight / 2);
+    updateVisible();
+  }
+
+  /* =====================================================================
+     10. SELECCIÓN, MEDICIÓN Y CORRELACIÓN
+     ===================================================================== */
+
+  /* Búsqueda binaria del vecino más cercano en un array ordenado. */
+  function nearestIndex(tsArr, t){
+    const n = tsArr.length;
+    if (!n) return -1;
+    let lo = 0, hi = n - 1;
+    while (lo < hi){ const mid = (lo + hi) >> 1; if (tsArr[mid] < t) lo = mid + 1; else hi = mid; }
+    if (lo > 0 && Math.abs(tsArr[lo-1] - t) <= Math.abs(tsArr[lo] - t)) return lo - 1;
+    return lo;
+  }
+
+  function renderSelection(){
+    const has = state.anchor >= 0;
+    $('mA').textContent = has ? formatStamp(state.gTs[state.anchor]).slice(11) : '—';
+    $('mA').title = has ? formatStamp(state.gTs[state.anchor]) : '';
+    $('mB').textContent = state.second >= 0 ? formatStamp(state.gTs[state.second]).slice(11) : '—';
+    $('mB').title = state.second >= 0 ? formatStamp(state.gTs[state.second]) : '';
+    $('mDelta').textContent = (has && state.second >= 0)
+      ? formatDur(state.gTs[state.second] - state.gTs[state.anchor]) : '—';
+
+    /* Detalle del ancla */
+    const head = $('detailHead'), msg = $('detailMsg');
+    if (!has){
+      head.innerHTML = '<span class="tag">Detalle</span><span class="hint" style="margin:0">Selecciona un mensaje de la lista para verlo completo.</span>';
+      msg.classList.add('hidden'); msg.textContent = '';
+    } else {
+      const i = state.anchor, src = sources[state.gSrc[i]], meta = LEVELS[state.gLvl[i]];
+      head.innerHTML =
+        '<span class="tag" style="background:'+src.color+'22;color:'+src.color+'">'+escapeHtml(src.name)+'</span>' +
+        '<span class="tag">'+meta.name+'</span>' +
+        '<span class="hint" style="margin:0">'+formatStamp(state.gTs[i])+' · línea '+state.gLine[i]+'</span>';
+      msg.classList.remove('hidden');
+      msg.textContent = state.gMsg[i];
+    }
+
+    /* Correlación por fuente */
+    const list = $('corrList');
+    if (!has){
+      list.innerHTML = '<div class="empty">Fija un ancla para ver el mensaje más cercano en cada estación.</div>';
+      return;
+    }
+    const at = state.gTs[state.anchor], ownSrc = state.gSrc[state.anchor];
+    const rows = [];
+    for (let s = 0; s < sources.length; s++){
+      if (s === ownSrc) continue;
+      const sr = sources[s];
+      if (!sr.count) continue;
+      const j = nearestIndex(sr.ts, at);
+      if (j < 0) continue;
+      rows.push({ s, j, d: sr.ts[j] - at });
+    }
+    rows.sort((a,b) => Math.abs(a.d) - Math.abs(b.d));
+
+    if (!rows.length){ list.innerHTML = '<div class="empty">No hay otras fuentes cargadas.</div>'; return; }
+
+    list.innerHTML = rows.map(r => {
+      const sr = sources[r.s];
+      const dir = r.d > 0 ? 'después' : (r.d < 0 ? 'antes' : 'mismo instante');
+      const cls = r.d > 0 ? 'after' : (r.d < 0 ? 'before' : 'same');
+      return '<div class="corr-row" data-src="'+r.s+'" data-idx="'+r.j+'" style="cursor:pointer">' +
+          '<span class="s"><i style="background:'+sr.color+'"></i><span>'+escapeHtml(sr.name)+'</span></span>' +
+          '<span class="d '+cls+'">'+formatDur(r.d)+'</span>' +
+          '<span class="dir">'+dir+'</span>' +
+        '</div>' +
+        '<div class="corr-msg">'+escapeHtml(sr.msg[r.j]).slice(0, 220)+'</div>';
+    }).join('');
+  }
+
+  /* Salta a un evento concreto de una fuente (usado por correlación). */
+  function jumpToSourceEvent(srcIdx, evtIdx){
+    if (!state.viewN) return;
+    const sr = sources[srcIdx];
+    const ts = sr.ts[evtIdx];
+    /* Buscamos en la vista global un evento de esa fuente con ese timestamp.
+       Como la vista puede estar filtrada, hacemos búsqueda binaria por tiempo
+       y luego afinamos por fuente. */
+    let lo = 0, hi = state.viewN - 1, best = -1;
+    while (lo <= hi){
+      const mid = (lo + hi) >> 1;
+      const i = state.view[mid];
+      if (state.gTs[i] < ts){ lo = mid + 1; }
+      else if (state.gTs[i] > ts){ hi = mid - 1; }
+      else { best = mid; break; }
+    }
+    if (best < 0) best = Math.max(0, Math.min(state.viewN - 1, lo));
+    const i = state.view[best];
+    state.anchor = i; state.second = -1;
+    scrollToPos(best);
+    renderSelection(); updateBadges();
+  }
+
+  /* Posición (dentro de la vista) donde insertaría el índice global `gi`. */
+  function viewLowerBound(gi){
+    let lo = 0, hi = state.viewN;
+    while (lo < hi){ const mid = (lo + hi) >> 1; if (state.view[mid] < gi) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+
+  /* Traduce un evento de una fuente (por su índice interno) a índice global.
+     Se apoya en que los eventos globales están ordenados por tiempo. */
+  function globalIndexOfSourceEvent(s, j){
+    const ts = sources[s].ts[j], line = sources[s].line[j];
+    const gTs = state.gTs, n = state.total;
+    let lo = 0, hi = n - 1, first = n;
+    while (lo <= hi){ const mid = (lo + hi) >> 1; if (gTs[mid] < ts){ lo = mid + 1; } else { first = mid; hi = mid - 1; } }
+    for (let i = first; i < n && gTs[i] === ts; i++)
+      if (state.gSrc[i] === s && state.gLine[i] === line) return i;
+    for (let i = first - 1; i >= 0 && gTs[i] === ts; i--)
+      if (state.gSrc[i] === s && state.gLine[i] === line) return i;
+    return first < n ? first : -1;
+  }
+
+  function setGotoMsg(text, bad){
+    const el = $('gotoMsg');
+    el.textContent = text || '';
+    el.className = 'goto-msg' + (bad ? ' bad' : '');
+  }
+
+  /* Salta a una línea original concreta de una fuente. */
+  function gotoLine(){
+    const s = +$('gotoSrc').value;
+    const line = parseInt($('gotoLine').value, 10);
+    if (!(s >= 0) || !(line > 0) || !sources[s]) return;
+    if (!state.viewN){ setGotoMsg('No hay mensajes visibles.', true); return; }
+
+    const src = sources[s], lines = src.line, n = src.count;
+    let j = -1;
+    if (src.lineMono){
+      let lo = 0, hi = n - 1, res = -1;
+      while (lo <= hi){ const mid = (lo + hi) >> 1; if (lines[mid] >= line){ res = mid; hi = mid - 1; } else lo = mid + 1; }
+      j = res;
+    } else {
+      for (let k = 0; k < n; k++){ if (lines[k] === line){ j = k; break; } }
+    }
+    if (j < 0){ setGotoMsg('No se encontró ninguna línea ≥ '+line+' en '+src.name, true); return; }
+
+    const gi = globalIndexOfSourceEvent(s, j);
+    if (gi < 0){ setGotoMsg('No se pudo localizar la línea '+line+' en '+src.name, true); return; }
+
+    state.anchor = gi; state.second = -1;
+    const lb = viewLowerBound(gi);
+    const visible = lb < state.viewN && state.view[lb] === gi;
+    scrollToPos(visible ? lb : Math.min(state.viewN - 1, lb));
+    renderTimeline(); renderSelection(); updateBadges();
+    setGotoMsg((visible ? '' : 'Oculta por el filtro · ') + src.name + ' · línea ' + lines[j] + ' · ' + formatStamp(src.ts[j]), !visible);
+  }
+
+  /* =====================================================================
+     11. GRÁFICO DE ACTIVIDAD
+     ===================================================================== */
+  const actCanvas = $('activity');
+
+  /* Histograma de actividad apilado por fuente.
+     Usa la MISMA vista filtrada que la línea de tiempo: respeta fuentes,
+     niveles, texto y colapso, y ajusta el eje temporal al rango visible. */
+  function drawActivity(){
+    const dpr = window.devicePixelRatio || 1;
+    const w = actCanvas.clientWidth || 600, h = actCanvas.clientHeight || 128;
+    actCanvas.width = w * dpr; actCanvas.height = h * dpr;
+    const ctx = actCanvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const vn = state.viewN;
+    if (!vn){
+      ctx.fillStyle = '#8b93ab';
+      ctx.font = '12px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(state.total ? 'Ningún mensaje cumple los filtros actuales' : 'Carga logs para ver el histograma de actividad', w/2, h/2);
+      $('actBadge').textContent = state.total ? 'vista vacía' : '—';
+      actCanvas._buckets = 0;
+      return;
+    }
+
+    /* La vista conserva el orden cronológico, así que sus extremos dan el
+       rango temporal filtrado sin recorrer nada. */
+    const view = state.view;
+    const t0 = state.gTs[view[0]];
+    const t1 = state.gTs[view[vn-1]];
+    const span = Math.max(1, t1 - t0);
+    const buckets = Math.max(40, Math.min(320, Math.floor(w / 3)));
+    const counts = sources.map(() => new Uint32Array(buckets));
+    for (let p = 0; p < vn; p++){
+      const i = view[p];
+      const b = Math.min(buckets - 1, Math.floor((state.gTs[i] - t0) / span * buckets));
+      counts[state.gSrc[i]][b]++;
+    }
+    let max = 1;
+    for (let s = 0; s < counts.length; s++)
+      for (let b = 0; b < buckets; b++) if (counts[s][b] > max) max = counts[s][b];
+
+    const bw = w / buckets, base = h - 16, usable = h - 26;
+    const offsets = new Float64Array(buckets);
+    for (let s = 0; s < sources.length; s++){
+      const arr = counts[s];
+      let any = false;
+      for (let b = 0; b < buckets; b++){ if (arr[b]){ any = true; break; } }
+      if (!any) continue;
+      ctx.fillStyle = sources[s].color;
+      for (let b = 0; b < buckets; b++){
+        const v = arr[b]; if (!v) continue;
+        const bh = (v / max) * usable;
+        ctx.fillRect(b * bw, base - offsets[b] - bh, Math.max(1, bw - 0.6), bh);
+        offsets[b] += bh;
+      }
+    }
+
+    /* Línea base y marcas de tiempo */
+    ctx.strokeStyle = '#dde3ee'; ctx.beginPath();
+    ctx.moveTo(0, base + 0.5); ctx.lineTo(w, base + 0.5); ctx.stroke();
+    ctx.fillStyle = '#8b93ab'; ctx.font = '10px ui-monospace, monospace';
+    ctx.textAlign = 'left';  ctx.fillText(formatStamp(t0).slice(11, 19), 2, h - 3);
+    ctx.textAlign = 'right'; ctx.fillText(formatStamp(t1).slice(11, 19), w - 2, h - 3);
+
+    /* Marca del ancla (solo si cae dentro del rango filtrado) */
+    if (state.anchor >= 0){
+      const at = state.gTs[state.anchor];
+      if (at >= t0 && at <= t1){
+        const x = ((at - t0) / span) * w;
+        ctx.strokeStyle = '#054cd9'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, base); ctx.stroke();
+      }
+    }
+
+    $('actBadge').textContent = formatInt(vn) + ' msgs · ' + formatDur(span);
+    actCanvas._buckets = buckets; actCanvas._t0 = t0; actCanvas._span = span;
+  }
+
+  function renderChartLegend(){
+    $('chartLegend').innerHTML = sources.length
+      ? sources.map(s => '<span><i style="background:'+s.color+'"></i>'+escapeHtml(s.name)+'</span>').join('') +
+        '<span class="mute">Refleja los filtros aplicados · clic para saltar a ese instante</span>'
+      : '<span class="mute">Sin fuentes</span>';
+  }
+
+  /* =====================================================================
+     12. CARGA ORQUESTADA
+     ===================================================================== */
+
+  function setProgress(p, name){
+    const wrap = $('progWrap');
+    if (p === null){ wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    $('progBar').style.width = Math.round(p * 100) + '%';
+    $('progPct').textContent = Math.round(p * 100) + ' %';
+    if (name) $('progName').textContent = name;
+  }
+
+  async function loadFiles(fileList){
+    const files = Array.from(fileList || []);
+    if (!files.length || state.loading) return;
+
+    state.loading = true; state.cancel = false;
+    $('cancelBtn').disabled = false; $('clearBtn').disabled = true;
+    const tStart = performance.now();
+
+    for (let fi = 0; fi < files.length; fi++){
+      if (state.cancel) break;
+      const file = files[fi];
+      const src = {
+        id: srcSeq++, name: file.name, color: PALETTE[srcSeq % PALETTE.length],
+        size: file.size, enabled: true, count: 0,
+        lvlCounts: new Uint32Array(LEVELS.length),
+        ts: null, lvl: null, line: null, msg: null
+      };
+      /* El color se asigna por id para que cada fuente tenga uno estable. */
+      src.color = PALETTE[src.id % PALETTE.length];
+      sources.push(src);
+      renderSources();
+      setProgress(0, file.name);
+      await new Promise(r => setTimeout(r, 0));   // deja pintar el progreso
+
+      let ok = true;
+      try {
+        ok = await parseFile(file, src, p => setProgress(p, file.name));
+      } catch(err){
+        console.error('Error parseando', file.name, err);
+        ok = false;
+      }
+
+      if (!ok || state.cancel || src.count === 0){
+        const idx = sources.indexOf(src);
+        if (idx >= 0) sources.splice(idx, 1);
+        renderSources();
+        continue;
+      }
+
+      if (!src.sorted) sortSource(src);
+      src.lineMono = isMonotonicLines(src.line, src.count);
+      src.minTs = src.ts[0];
+      src.maxTs = src.ts[src.count - 1];
+      recomputeGlobals();
+      buildView();
+      refreshAll();
+    }
+
+    state.parseMs = performance.now() - tStart;
+    state.loading = false;
+    $('cancelBtn').disabled = true; $('clearBtn').disabled = !sources.length;
+    setProgress(null);
+    refreshAll();
+  }
+
+  function refreshAll(){
+    renderSources();
+    renderStats();
+    renderTimeline();
+    renderSelection();
+    renderChartLegend();
+    drawActivity();
+    updateBadges();
+  }
+
+  /* Reconstruye la vista y todo lo que depende de ella, incluido el
+     histograma de actividad (que refleja exactamente los filtros activos). */
+  function refreshViewNow(){
+    buildView();
+    renderTimeline();
+    renderSelection();
+    updateBadges();
+    drawActivity();
+  }
+
+  /* =====================================================================
+     13. EXPORTAR / COPIAR
+     ---------------------------------------------------------------------
+     Tres salidas sobre la MISMA vista filtrada y en orden cronológico:
+       · .txt  → línea de tiempo legible (una línea por mensaje)
+       · .csv  → columnas (fecha_hora, delta_ms, fuente, nivel, mensaje, linea)
+       · portapapeles → mismas columnas en TSV, listo para pegar en Excel
+     ===================================================================== */
+
+  const EXPORT_HEADER = ['fecha_hora', 'delta_ms', 'fuente', 'nivel', 'mensaje', 'linea'];
+  const MAX_CLIPBOARD_ROWS = 200000;
+
+  /* Escapa un campo para CSV (comillas dobles si contiene separador, comilla o salto). */
+  function csvField(v){
+    const s = String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  /* Construye las filas de la vista en el formato pedido. Devuelve un array
+     de cadenas SIN unirlas, para no duplicar el texto en memoria. */
+  function buildExportRows(format){
+    const parts = [];
+    if (format === 'csv')      parts.push(EXPORT_HEADER.join(','));
+    else if (format === 'tsv') parts.push(EXPORT_HEADER.join('\t'));
+
+    let prevTs = NaN;
+    for (let p = 0; p < state.viewN; p++){
+      const i = state.view[p];
+      const ts = state.gTs[i];
+      if (format === 'txt'){
+        parts.push(formatStamp(ts) + ' -> [' + sources[state.gSrc[i]].name + '] ' + LEVELS[state.gLvl[i]].name + ': ' + state.gMsg[i]);
+      } else {
+        const delta = isNaN(prevTs) ? '' : (ts - prevTs);
+        const fields = [formatStamp(ts), delta, sources[state.gSrc[i]].name, LEVELS[state.gLvl[i]].name, state.gMsg[i], state.gLine[i]];
+        parts.push(format === 'csv'
+          ? fields.map(csvField).join(',')
+          : fields.map(f => String(f).replace(/[\t\n\r]+/g, ' ')).join('\t'));
+      }
+      prevTs = ts;
+    }
+    return parts;
+  }
+
+  function download(parts, ext, mime){
+    const blob = new Blob(parts, {type: mime});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vista-combinada-' + Date.now() + '.' + ext;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  function exportFiltered(){
+    if (!state.viewN) return;
+    download(buildExportRows('txt'), 'txt', 'text/plain;charset=utf-8');
+    setExportStatus('Descargando .txt con ' + formatInt(state.viewN) + ' filas…', false);
+  }
+
+  function exportCsv(){
+    if (!state.viewN) return;
+    const rows = buildExportRows('csv');
+    rows[0] = '\uFEFF' + rows[0];   // BOM para que Excel detecte UTF-8
+    download(rows, 'csv', 'text/csv;charset=utf-8');
+    setExportStatus('Descargando .csv con ' + formatInt(state.viewN) + ' filas…', false);
+  }
+
+  async function copyView(){
+    if (!state.viewN) return;
+    if (state.viewN > MAX_CLIPBOARD_ROWS){
+      setExportStatus('La vista tiene ' + formatInt(state.viewN) + ' filas; el portapapeles admite hasta ' + formatInt(MAX_CLIPBOARD_ROWS) + '. Usa el .csv.', true);
+      return;
+    }
+    const rows = buildExportRows('tsv');
+    try {
+      if (!navigator.clipboard) throw new Error('sin clipboard');
+      await navigator.clipboard.writeText(rows.join('\n'));
+      setExportStatus('Copiadas ' + formatInt(state.viewN) + ' filas (TSV) al portapapeles.', false);
+    } catch(e){
+      setExportStatus('No se pudo acceder al portapapeles. Sirve la carpeta por http:// para habilitarlo.', true);
+    }
+  }
+
+  let exportStatusTimer;
+  function setExportStatus(text, bad){
+    const el = $('exportStatus');
+    clearTimeout(exportStatusTimer);
+    if (!text){ el.textContent = ''; el.classList.add('hidden'); return; }
+    el.textContent = text;
+    el.classList.toggle('warn-text', !!bad);
+    el.classList.remove('hidden');
+    if (!bad) exportStatusTimer = setTimeout(() => el.classList.add('hidden'), 4000);
+  }
+
+  async function copySelection(){
+    if (state.anchor < 0) return;
+    const lines = [formatStamp(state.gTs[state.anchor]) + ' -> [' + sources[state.gSrc[state.anchor]].name + '] ' + state.gMsg[state.anchor]];
+    if (state.second >= 0){
+      lines.push(formatStamp(state.gTs[state.second]) + ' -> [' + sources[state.gSrc[state.second]].name + '] ' + state.gMsg[state.second]);
+      lines.push('Δt = ' + formatDur(state.gTs[state.second] - state.gTs[state.anchor]));
+    }
+    try {
+      if (!navigator.clipboard) throw new Error('sin clipboard');
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setExportStatus('Selección copiada.', false);
+    } catch(e){
+      setExportStatus('No se pudo acceder al portapapeles.', true);
+    }
+  }
+
+  /* =====================================================================
+     14. EVENTOS DE UI
+     ===================================================================== */
+
+  /* --- Carga --- */
+  const drop = $('drop'), fileInput = $('fileInput');
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  fileInput.addEventListener('change', () => { loadFiles(fileInput.files); fileInput.value = ''; });
+
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files) loadFiles(e.dataTransfer.files); });
+  /* Evita que soltar fuera de la zona abra el archivo en el navegador. */
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => e.preventDefault());
+
+  $('cancelBtn').addEventListener('click', () => { state.cancel = true; });
+  $('clearBtn').addEventListener('click', () => {
+    if (!sources.length) return;
+    sources.length = 0;
+    state.anchor = -1; state.second = -1;
+    recomputeGlobals(); buildView(); refreshAll();
+  });
+
+  /* --- Lista de fuentes (delegado) --- */
+  $('srcList').addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const i = +el.dataset.i;
+    if (el.dataset.act === 'remove'){
+      sources.splice(i, 1);
+      state.anchor = -1; state.second = -1;
+      recomputeGlobals(); buildView(); refreshAll();
+    } else if (el.dataset.act === 'rename'){
+      startRename(i, el);
+    }
+  });
+  $('srcList').addEventListener('change', e => {
+    const el = e.target.closest('[data-act="toggle"]');
+    if (!el) return;
+    sources[+el.dataset.i].enabled = el.checked;
+    renderSources(); renderChartLegend();
+    refreshViewNow();
+  });
+
+  /* --- Filtros ---
+     Con millones de líneas, reconstruir la vista recorre todos los eventos:
+     por eso NO se aplica al teclear. El usuario pulsa «Aplicar filtro» (o
+     Enter) cuando ha terminado de escribir. */
+  function setFilterDirty(dirty){
+    const btn = $('filterApply');
+    btn.disabled = !dirty;
+    btn.classList.toggle('primary', dirty);
+    const hint = $('filterHint');
+    hint.classList.toggle('warn-text', dirty);
+    hint.innerHTML = dirty
+      ? 'Cambios sin aplicar. Pulsa <b>Aplicar filtro</b> o <kbd>Enter</kbd> para reconstruir la vista.'
+      : 'Escribe y pulsa <b>Aplicar filtro</b> (o <kbd>Enter</kbd>). Se aplica sobre el mensaje; vacío = sin filtro.';
+  }
+  function applyFilter(){
+    const btn = $('filterApply');
+    state.filterText = $('filterInput').value.trim();
+    state.filterRegex = $('filterRegex').checked;
+    state.filterCase = $('filterCase').checked;
+    setFilterDirty(false);
+    btn.disabled = true; btn.textContent = 'Aplicando…';
+    /* Se cede el hilo para que el botón pinte antes del barrido. */
+    setTimeout(() => {
+      refreshViewNow();
+      btn.textContent = 'Aplicar filtro';
+    }, 0);
+  }
+  $('filterInput').addEventListener('input', () => setFilterDirty(true));
+  $('filterRegex').addEventListener('change', () => setFilterDirty(true));
+  $('filterCase').addEventListener('change', () => setFilterDirty(true));
+  $('filterInput').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); applyFilter(); } });
+  $('filterApply').addEventListener('click', applyFilter);
+
+  /* --- Búsqueda: igual, bajo demanda (también recorre toda la vista). --- */
+  function applySearch(){
+    state.searchText = $('searchInput').value.trim();
+    state.searchRegex = $('searchRegex').checked;
+    state.searchCase = $('searchCase').checked;
+    runSearch(); renderTimeline(); updateBadges();
+  }
+  $('searchApply').addEventListener('click', applySearch);
+  $('searchInput').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const pending = $('searchInput').value.trim() !== state.searchText
+      || $('searchRegex').checked !== state.searchRegex
+      || $('searchCase').checked !== state.searchCase;
+    if (pending) applySearch();
+    else gotoMatch(e.shiftKey ? -1 : 1);
+  });
+
+  function gotoMatch(delta){
+    if (!state.matchN) return;
+    state.matchPos += delta;
+    if (state.matchPos < 0) state.matchPos = state.matchN - 1;
+    if (state.matchPos >= state.matchN) state.matchPos = 0;
+    const pos = state.matches[state.matchPos];
+    state.anchor = state.view[pos]; state.second = -1;
+    scrollToPos(pos);
+    renderSelection(); updateBadges();
+  }
+  $('searchNext').addEventListener('click', () => gotoMatch(1));
+  $('searchPrev').addEventListener('click', () => gotoMatch(-1));
+
+  $('lvlChips').addEventListener('click', e => {
+    const c = e.target.closest('[data-lvl]');
+    if (!c) return;
+    const i = +c.dataset.lvl;
+    state.levelOn[i] = state.levelOn[i] ? 0 : 1;
+    renderLevelChips(); refreshViewNow();
+  });
+  $('lvlAll').addEventListener('click', () => {
+    const on = !allLevelsOn();
+    state.levelOn.fill(on ? 1 : 0);
+    renderLevelChips(); refreshViewNow();
+  });
+
+  $('gapInput').addEventListener('input', e => { state.gapMs = Math.max(0, +e.target.value || 0); renderTimeline(); });
+
+  $('collapseChk').addEventListener('change', e => { state.collapse = e.target.checked; refreshViewNow(); });
+
+  /* --- Delta --- */
+  $('deltaSeg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-m]');
+    if (!b) return;
+    state.deltaMode = b.dataset.m;
+    Array.from($('deltaSeg').children).forEach(x => x.classList.toggle('active', x === b));
+    $('deltaBadge').textContent = state.deltaMode === 'prev' ? 'Δ desde anterior' : 'Δ desde ancla';
+    renderTimeline();
+  });
+
+  /* --- Selección en la lista --- */
+  tlRows.addEventListener('click', e => {
+    const row = e.target.closest('.tl-row');
+    if (!row) return;
+    const i = +row.dataset.i;
+    if (e.shiftKey && state.anchor >= 0){ state.second = i; }
+    else { state.anchor = i; state.second = -1; }
+    renderTimeline(); renderSelection(); updateBadges();
+  });
+
+  $('corrList').addEventListener('click', e => {
+    const row = e.target.closest('.corr-row');
+    if (!row) return;
+    jumpToSourceEvent(+row.dataset.src, +row.dataset.idx);
+  });
+
+  $('clearSelBtn').addEventListener('click', () => {
+    state.anchor = -1; state.second = -1;
+    renderTimeline(); renderSelection(); updateBadges();
+  });
+
+  /* --- Navegación --- */
+  function moveAnchor(delta){
+    if (!state.viewN) return;
+    let pos;
+    if (state.anchor < 0) pos = 0;
+    else {
+      /* localiza la posición actual del ancla dentro de la vista */
+      let lo = 0, hi = state.viewN - 1; pos = 0;
+      while (lo <= hi){ const mid = (lo + hi) >> 1; if (state.view[mid] < state.anchor) lo = mid + 1; else if (state.view[mid] > state.anchor) hi = mid - 1; else { pos = mid; break; } }
+      pos = Math.max(0, Math.min(state.viewN - 1, pos + delta));
+    }
+    state.anchor = state.view[pos]; state.second = -1;
+    scrollToPos(pos); renderTimeline(); renderSelection(); updateBadges();
+  }
+  $('goStart').addEventListener('click', () => { if (state.viewN){ state.anchor = state.view[0]; state.second = -1; scrollToPos(0); renderTimeline(); renderSelection(); updateBadges(); } });
+  $('goEnd').addEventListener('click', () => { if (state.viewN){ state.anchor = state.view[state.viewN-1]; state.second = -1; scrollToPos(state.viewN-1); renderTimeline(); renderSelection(); updateBadges(); } });
+
+  /* --- Salto a una línea concreta --- */
+  $('gotoBtn').addEventListener('click', gotoLine);
+  $('gotoLine').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); gotoLine(); } });
+  $('gotoSrc').addEventListener('change', () => setGotoMsg(''));
+
+  tlScroll.addEventListener('scroll', onScroll);
+
+  /* --- Gráfico: clic para saltar --- */
+  actCanvas.addEventListener('click', e => {
+    if (!state.total || !state.viewN || !actCanvas._buckets) return;
+    const rect = actCanvas.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ts = actCanvas._t0 + frac * actCanvas._span;
+    /* Búsqueda binaria del evento global más cercano a ese instante. */
+    const gTs = state.gTs;
+    let lo = 0, hi = state.total - 1;
+    while (lo < hi){ const mid = (lo + hi) >> 1; if (gTs[mid] < ts) lo = mid + 1; else hi = mid; }
+    if (lo > 0 && Math.abs(gTs[lo-1] - ts) < Math.abs(gTs[lo] - ts)) lo--;
+    /* Traducimos índice global → posición en la vista (búsqueda binaria). */
+    let a = 0, b = state.viewN - 1, pos = 0;
+    while (a <= b){ const mid = (a + b) >> 1; if (state.view[mid] < lo) a = mid + 1; else if (state.view[mid] > lo) b = mid - 1; else { pos = mid; break; } }
+    state.anchor = state.view[pos]; state.second = -1;
+    scrollToPos(pos); renderTimeline(); renderSelection(); updateBadges();
+  });
+
+  /* --- Export / copiar --- */
+  $('exportBtn').addEventListener('click', exportFiltered);
+  $('exportCsvBtn').addEventListener('click', exportCsv);
+  $('copyViewBtn').addEventListener('click', copyView);
+  $('copySelBtn').addEventListener('click', copySelection);
+
+  /* --- Ayuda --- */
+  $('helpBtn').addEventListener('click', () => {
+    const row = $('helpRow');
+    const open = row.classList.toggle('hidden') === false;
+    $('helpBtn').classList.toggle('active', open);
+    $('helpBtn').setAttribute('aria-expanded', String(open));
+  });
+
+  /* --- Teclado global --- */
+  window.addEventListener('keydown', e => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+    if (e.key === 'ArrowDown'){ e.preventDefault(); moveAnchor(1); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); moveAnchor(-1); }
+    else if (e.key === 'PageDown'){ e.preventDefault(); moveAnchor(Math.floor(tlScroll.clientHeight / ROW_H)); }
+    else if (e.key === 'PageUp'){ e.preventDefault(); moveAnchor(-Math.floor(tlScroll.clientHeight / ROW_H)); }
+    else if (e.key === 'Home'){ e.preventDefault(); $('goStart').click(); }
+    else if (e.key === 'End'){ e.preventDefault(); $('goEnd').click(); }
+    else if (e.key === 'Enter' && state.searchText){ e.preventDefault(); gotoMatch(e.shiftKey ? -1 : 1); }
+    else if (e.key === 'Escape'){ state.anchor = -1; state.second = -1; renderTimeline(); renderSelection(); updateBadges(); }
+  });
+
+  window.addEventListener('resize', debounce(() => { drawActivity(); updateVisible(); }, 150));
+
+  /* =====================================================================
+     15. ARRANQUE
+     ===================================================================== */
+  renderLevelChips();
+  renderSources();
+  renderStats();
+  renderSelection();
+  renderChartLegend();
+  drawActivity();
+  updateBadges();
+  setFilterDirty(false);
+})();
+</script>
+
+</body>
+</html>

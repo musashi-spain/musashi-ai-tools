@@ -7,6 +7,7 @@ Portal de herramientas internas de **Musashi AI** (visión artificial / inspecci
 ```
 index.html              Portal: lista las herramientas
 simulador-lentes/       Simulador de lentes y cámaras (HTML+CSS+JS en un solo archivo)
+log-viewer/             Visor de logs multi-fuente (HTML+CSS+JS en un solo archivo)
 .nojekyll               Evita el procesado de Jekyll en Pages
 ```
 

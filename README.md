@@ -11,6 +11,8 @@ musashi-ai-tools/
 ├── index.html                  Portal: lista las herramientas disponibles
 ├── simulador-lentes/
 │   └── index.html              Simulador de lentes y cámaras (autocontenido)
+├── log-viewer/
+│   └── index.html              Visor de logs multi-fuente (autocontenido)
 ├── .nojekyll                   Evita el procesado de Jekyll en GitHub Pages
 ├── LICENSE                     Licencia MIT
 └── README.md
@@ -33,6 +35,26 @@ campo de visión (FOV) y profundidad de campo (DoF).
 - Exportación de la configuración al portapapeles.
 
 Abre `simulador-lentes/index.html` directamente en el navegador o entra desde el portal.
+
+### Visor de logs · correlación entre estaciones
+
+Visor para cruzar los logs de varias estaciones. Carga 2 o más archivos `.log`/`.txt`, extrae de cada
+línea su marca de tiempo y los **intercala en una única línea de tiempo cronológica**, con un color por
+fuente.
+
+- Lectura en **streaming** y **lista virtualizada**: pensado para archivos de cientos de MB y millones de líneas.
+- **Filtros** por texto/regex, nivel (`LOG 1`…`LOG 5`, `WARNING`, `ERROR`…) y fuente; opción de colapsar duplicados consecutivos. El filtro de texto se aplica bajo demanda (**Aplicar filtro**) para no reconstruir millones de filas en cada pulsación.
+- **Búsqueda** con resaltado y salto entre coincidencias (sin ocultar el resto).
+- **Fuentes renombrables**: haz clic en el nombre para etiquetar cada log con el nombre real de la estación.
+- **Ir a línea**: salta al número de línea original de un archivo concreto dentro de la línea de tiempo combinada.
+- **Medición de tiempos**: columna Δ respecto al mensaje anterior o a un ancla; `Shift`+clic para medir entre dos mensajes; detección de huecos.
+- **Correlación entre estaciones**: para un mensaje ancla, muestra el evento más cercano en cada otra fuente y su Δt.
+- **Gráfico de actividad** apilado por fuente, que **sigue los filtros aplicados** (fuentes, niveles, texto, colapso) y ajusta el rango temporal a la vista; clicable para saltar a un instante.
+- Estadísticas, **exportación de la vista filtrada** (`.txt` legible, `.csv` con columnas y copia al portapapeles en TSV) y atajos de teclado.
+
+Todo el procesamiento ocurre en el navegador; **ningún archivo se sube a ningún sitio**.
+
+Abre `log-viewer/index.html` directamente en el navegador o entra desde el portal.
 
 ## Añadir una nueva herramienta
 
