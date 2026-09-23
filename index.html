@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Musashi AI · Herramientas</title>
+<style>
+:root{
+  --mai-blue:#008cc5;
+  --mai-blue-dk:#00709e;
+  --space-cadet:#2e324f;
+  --glaucous:#8391c0;
+  --gray:#b3b3b3;
+  --sapphire:#054cd9;
+  --sky:#20beff;
+
+  --bg:#f4f6fa;
+  --panel:#ffffff;
+  --panel-2:#f3f6fb;
+  --line:#dde3ee;
+  --line-2:#eaeef6;
+  --txt:#1a1d2e;
+  --muted:#5c6480;
+  --muted-2:#8b93ab;
+
+  --accent:var(--mai-blue);
+  --accent-soft:#e3f3fa;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(46,50,79,.09);
+  --grad-blue:linear-gradient(135deg,#054cd9,#20beff);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--txt);
+  background:
+    radial-gradient(1100px 520px at 12% -12%, rgba(32,190,255,.13) 0%, transparent 58%),
+    radial-gradient(900px 480px at 100% -6%, rgba(131,145,192,.16) 0%, transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+
+header{padding:26px 26px 6px;max-width:1180px;margin:0 auto}
+.title{display:flex;align-items:center;gap:14px}
+.logo{
+  width:44px;height:44px;border-radius:12px;flex:none;position:relative;
+  background:var(--grad-blue);
+  box-shadow:0 8px 22px rgba(5,76,217,.30);
+  overflow:hidden;
+}
+.logo::after{
+  content:"A";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:"Univers","Poppins",system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;
+}
+.eyebrow{
+  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--mai-blue);margin-bottom:3px;
+}
+h1{font-size:21px;margin:0;letter-spacing:.2px;font-weight:700}
+header p{margin:4px 0 0;color:var(--muted);font-size:13px;max-width:640px}
+
+main{max-width:1180px;margin:0 auto;padding:26px 26px 60px}
+
+.section-title{
+  font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted-2);margin:0 0 4px;
+}
+
+/* ---------- Lista de herramientas (sin tarjetas: filas con línea fina) ---------- */
+.tools{border-top:1px solid var(--line);margin-top:14px}
+.tool{
+  display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:20px;align-items:center;
+  padding:22px 4px;border-bottom:1px solid var(--line-2);
+  text-decoration:none;color:inherit;transition:background .15s;
+}
+.tool:hover{background:rgba(0,140,197,.045)}
+.tool:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.tool .mark{
+  width:52px;height:52px;border-radius:12px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--grad-blue);color:#fff;font-weight:800;font-size:20px;
+  box-shadow:0 6px 16px rgba(5,76,217,.22);
+}
+.tool .body h2{margin:0;font-size:16px;font-weight:700;color:var(--txt)}
+.tool .body p{margin:5px 0 0;font-size:13px;color:var(--muted);line-height:1.55;max-width:720px}
+.tool .tags{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+.tool .tag{
+  font-size:10.5px;font-weight:600;letter-spacing:.3px;
+  color:var(--mai-blue-dk);background:var(--accent-soft);
+  padding:3px 9px;border-radius:99px;
+}
+.tool .go{
+  font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;
+  display:flex;align-items:center;gap:7px;
+}
+.tool .go .arrow{transition:transform .16s}
+.tool:hover .go .arrow{transform:translateX(4px)}
+
+@media (max-width:720px){
+  .tool{grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto auto;gap:14px}
+  .tool .go{grid-column:2;justify-content:flex-start}
+  .tool .mark{width:44px;height:44px;font-size:17px}
+}
+
+footer{
+  max-width:1180px;margin:0 auto;padding:0 26px 40px;
+  font-size:11.5px;color:var(--muted-2);line-height:1.6;
+}
+footer b{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <div class="eyebrow">Musashi AI · Automated Inspection Solutions</div>
+      <h1>Herramientas</h1>
+      <p>Utilidades internas para el diseño y la validación de sistemas de inspección automatizada.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="section-title">Herramientas disponibles</p>
+  <nav class="tools">
+
+    <a class="tool" href="simulador-lentes/index.html">
+      <span class="mark" aria-hidden="true">◉</span>
+      <span class="body">
+        <h2>Simulador de lentes y cámaras</h2>
+        <p>Calculadora visual para visión artificial: relación entre sensor, distancia focal, distancia de trabajo,
+           campo de visión (FOV) y profundidad de campo (DoF). Incluye catálogo multi-marca, simulación de anillos
+           separadores, comprobación de cobertura y vistas esquemáticas en vivo.</p>
+        <span class="tags">
+          <span class="tag">FOV</span>
+          <span class="tag">DoF</span>
+          <span class="tag">Catálogo multi-marca</span>
+          <span class="tag">Anillos separadores</span>
+        </span>
+      </span>
+      <span class="go">Abrir herramienta <span class="arrow" aria-hidden="true">→</span></span>
+    </a>
+
+  </nav>
+</main>
+
+<footer>
+  <b>Musashi AI</b> · Herramientas internas · Añade nuevas utilidades creando una subcarpeta con su propio
+  <code>index.html</code> y un enlace en esta página.
+</footer>
+
+</body>
+</html>
