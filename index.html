@@ -6,6 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Musashi AI · Herramientas</title>
 <style>
 :root{
@@ -49,14 +50,10 @@ body{
 header{padding:26px 26px 6px;max-width:1180px;margin:0 auto}
 .title{display:flex;align-items:center;gap:14px}
 .logo{
-  width:44px;height:44px;border-radius:12px;flex:none;position:relative;
-  background:var(--grad-blue);
-  box-shadow:0 8px 22px rgba(5,76,217,.30);
-  overflow:hidden;
-}
-.logo::after{
-  content:"A";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:"Univers","Poppins",system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;
+  width:44px;height:44px;border-radius:12px;flex:none;
+  background:#fff url("favicon.svg") center/64% no-repeat;
+  border:1px solid var(--line);
+  box-shadow:0 8px 22px rgba(5,76,217,.18);
 }
 .eyebrow{
   font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
