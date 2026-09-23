@@ -2,6 +2,8 @@
 
 Portal de utilidades internas de **Musashi AI**.
 
+**Enlace público:** <https://musashi-spain.github.io/musashi-ai-tools/>
+
 ## Estructura
 
 ```
@@ -10,6 +12,7 @@ musashi-ai-tools/
 ├── simulador-lentes/
 │   └── index.html              Simulador de lentes y cámaras (autocontenido)
 ├── .nojekyll                   Evita el procesado de Jekyll en GitHub Pages
+├── LICENSE                     Licencia MIT
 └── README.md
 ```
 
@@ -46,7 +49,7 @@ Abre `simulador-lentes/index.html` directamente en el navegador o entra desde el
 2. En **Settings → Pages**, selecciona:
    - **Source**: `Deploy from a branch`
    - **Branch**: `main` · carpeta `/ (root)`
-3. La web quedará en `https://<usuario>.github.io/<repositorio>/`.
+3. La web quedará en `https://musashi-spain.github.io/musashi-ai-tools/`.
 
 El archivo `.nojekyll` ya está incluido para que GitHub Pages sirva los archivos tal cual,
 sin intentar procesarlos con Jekyll.
@@ -67,3 +70,7 @@ python3 -m http.server 8000
 - Las especificaciones del catálogo están tomadas de la documentación oficial de cada fabricante.
 - La herramienta es una ayuda de dimensionado; valida siempre los cálculos con la MTF de la lente
   y el modelo de desenfoque real de tu aplicación.
+
+## Licencia
+
+Publicado bajo licencia **MIT**. Consulta [LICENSE](LICENSE).
